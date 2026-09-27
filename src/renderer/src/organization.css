@@ -1,0 +1,102 @@
+.organization-backdrop {
+  z-index: 90;
+}
+.organization-dialog {
+  width: 580px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  outline: none;
+}
+.organization-dialog fieldset {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  min-width: 0;
+}
+.organization-dialog .form-label + .form-label {
+  margin-top: 18px;
+}
+.organization-dialog select {
+  width: 100%;
+  min-width: 0;
+}
+.organization-dialog .category-delete {
+  margin-right: auto;
+}
+.organization-error {
+  color: var(--danger);
+  background: var(--danger-bg);
+  padding: 10px;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+.folder-source {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  margin-top: 0;
+}
+.folder-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  background: var(--tint);
+  color: var(--tint-text);
+  padding: 16px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+.folder-stats strong {
+  font-size: 22px;
+}
+.folder-details {
+  margin: 12px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.folder-details summary {
+  padding: 12px;
+  cursor: pointer;
+}
+.folder-details ul {
+  margin: 0;
+  padding: 6px 12px 12px;
+  max-height: 180px;
+  overflow: auto;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+.folder-details li {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  overflow-wrap: anywhere;
+  align-items: start;
+}
+.folder-details svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.category-row {
+  padding-right: 4px;
+}
+.category-manage {
+  flex-shrink: 0;
+  width: 24px;
+  padding: 4px;
+  margin-left: 3px;
+  opacity: 0.5;
+}
+.category-row:hover .category-manage,
+.category-row:focus-within .category-manage {
+  opacity: 1;
+}
+.selection-toolbar {
+  flex-wrap: wrap;
+}
+.selection-toolbar .text-button {
+  margin-left: 0;
+}
+.selection-toolbar > span {
+  margin-right: auto;
+}

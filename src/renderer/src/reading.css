@@ -1,0 +1,243 @@
+.reading-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.reading-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.reading-tools button {
+  font-size: 11px;
+  padding: 6px 8px;
+  min-height: 28px;
+}
+.reader-find {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 100px;
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.reader-find input {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  outline: none;
+  font-size: 12px;
+}
+.reading-content {
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  overflow: auto;
+}
+.reading-content > .office-reader {
+  height: 100%;
+}
+.reading-content > .markdown-body {
+  padding: 24px;
+  min-height: 100%;
+  background: var(--surface);
+}
+.reading-hint {
+  margin: 0;
+  padding: 5px 10px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.annotation-list {
+  max-height: 32vh;
+  overflow: auto;
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+.annotation-list article {
+  border-left: 4px solid;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.annotation-list small {
+  display: block;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.annotation-list article > div {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+}
+.annotation-list button {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 11px;
+  text-align: left;
+  padding: 0;
+}
+.annotation-list .mark-quote {
+  color: var(--text);
+  font-size: 12px;
+  white-space: pre-wrap;
+  max-height: 90px;
+  overflow: auto;
+}
+.annotation-list p {
+  white-space: pre-wrap;
+}
+.mark-editor {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  max-height: 38vh;
+  overflow: auto;
+  font-size: 12px;
+}
+.mark-editor blockquote {
+  margin: 0 0 8px;
+  max-height: 55px;
+  overflow: auto;
+  border-left: 3px solid var(--accent);
+  padding-left: 8px;
+}
+.mark-editor textarea {
+  display: block;
+  width: 100%;
+  height: 55px;
+  margin: 8px 0;
+  padding: 8px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  resize: vertical;
+}
+.mark-editor > div {
+  display: flex;
+  gap: 8px;
+}
+.annotation-error {
+  color: var(--danger);
+  font-size: 12px;
+  padding: 8px;
+  overflow-wrap: anywhere;
+}
+.managed-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.file-favorite {
+  color: var(--muted);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.file-favorite[aria-pressed='true'] {
+  color: #c49424;
+}
+.markdown-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.markdown-toolbar span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.draft-recovery {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--tint);
+  color: var(--tint-text);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+.draft-recovery span {
+  flex: 1;
+}
+.editor-preview > .reading-pane {
+  height: calc(100% - 40px);
+}
+.office-editor {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 14px 20px;
+}
+.office-editor > .reading-pane {
+  flex: 1;
+}
+.office-edit-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.office-edit-toolbar span,
+.office-edit-notice {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.office-fields {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin: 14px 0;
+}
+.office-field {
+  display: block;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.office-field strong {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+.office-field textarea {
+  display: block;
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px;
+  font: inherit;
+}
+.office-field small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+}
+[data-cell-mark] {
+  user-select: text;
+}

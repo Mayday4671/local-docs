@@ -1,0 +1,63 @@
+{
+  "name": "local-docs",
+  "version": "0.8.1",
+  "private": true,
+  "description": "我的文档库：个人离线文档管理桌面应用",
+  "author": "Mayday4671",
+  "main": "out/main/index.js",
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "build": "npm run typecheck && electron-vite build",
+    "start": "electron-vite preview",
+    "test:desktop": "npm run build && node scripts/smoke.mjs",
+    "test:office": "npm run build && node scripts/office-smoke.mjs",
+    "test:history": "npm run build && node scripts/history-smoke.mjs",
+    "test:packaged": "node scripts/packaged-smoke.mjs",
+    "test:visual": "npm run build && node scripts/visual-smoke.mjs",
+    "test:formatting": "npm run build && node scripts/formatting-smoke.mjs",
+    "test:transfer": "npm run build && node scripts/transfer-smoke.mjs",
+    "test:organization": "npm run build && node scripts/organization-smoke.mjs",
+    "test:content": "npm run build && node scripts/content-smoke.mjs",
+    "test:office-layout": "npm run build && node scripts/office-layout-smoke.mjs",
+    "test:word-edit-fix": "npm run build && node scripts/word-edit-fix-smoke.mjs",
+    "test:editor-split": "npm run build && node scripts/editor-split-smoke.mjs",
+    "test:library-split": "npm run build && node scripts/library-split-smoke.mjs",
+    "package:win": "npm run build && electron-builder --win nsis --publish never"
+  },
+  "dependencies": {
+    "docx-preview": "0.4.1",
+    "fast-xml-parser": "5.11.1",
+    "fflate": "0.8.3",
+    "lucide-react": "1.48.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
+    "ssf": "0.11.2",
+    "yauzl": "3.4.0",
+    "yazl": "3.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/yauzl": "3.4.0",
+    "@types/yazl": "3.3.1",
+    "@vitejs/plugin-react": "5.2.0",
+    "electron": "44.4.5",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "prettier": "3.9.9",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
+  }
+}

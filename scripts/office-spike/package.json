@@ -1,0 +1,8 @@
+{
+  "name": "local-docs-office-feasibility",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "superdoc": "2.18.0"
+  }
+}
