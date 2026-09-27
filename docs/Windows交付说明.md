@@ -6,7 +6,11 @@
 
 `release/0.8.1/local-docs-0.8.1-x64-setup.exe`，114,739,530 字节（约 109 MiB）。
 
-保存并关闭旧版窗口后，双击 EXE，按照中文向导安装。应用包含运行环境、界面、数据库和本地文档解析，不需要另装 Node.js、npm 或服务器。安装包尚未数字签名，也未上传 GitHub Release。
+在线下载：[EXE 安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.8.1/local-docs-0.8.1-x64-setup.exe) · [发布说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.8.1) · [SHA256SUMS.txt](https://github.com/Mayday4671/local-docs/releases/download/v0.8.1/SHA256SUMS.txt)。以测试版发布。
+
+保存并关闭旧版窗口后，双击 EXE，按照中文向导安装。应用包含运行环境、界面、数据库引擎和本地文档解析，不需要另装 Node.js、npm、Office、WebView2 或服务器。安装与日常使用无需联网，可用 U 盘携带安装包。安装包尚未数字签名。
+
+发布资产仅包含 EXE 和校验文件，不含用户的本地资料库、个人文档或备份。已检查包内路径，没有打入用户数据库或 Office 文档；新电脑会创建空文档库，已有资料通过应用完整备份和恢复迁移。
 
 默认数据位置沿用 `%APPDATA%/local-docs/library/`。schema v5 添加标记、附件引用和恢复草稿，迁移测试验证旧库内容、收藏和历史保持完整，无需重新导入。测试示例不写入用户资料库。新版备份格式 v2 包含新增数据，仍支持恢复 v1；旧版应用无法读取 v2。
 

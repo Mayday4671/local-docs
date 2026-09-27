@@ -6,9 +6,13 @@
 
 ## Windows 安装使用
 
-本地安装包 **`release/0.8.1/local-docs-0.8.1-x64-setup.exe`**。双击进入中文安装向导，安装后从开始菜单打开“我的文档库”。普通使用无需安装 Node.js、启动终端或部署服务。
+**[下载 0.8.1 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.8.1/local-docs-0.8.1-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.8.1)
 
-这是 **0.8.1 测试版 EXE**。移除 Office 页面重复的“编辑内容”按钮，改用“编辑中 / 阅读中”文字说明状态，仅显示可执行的切换操作。沿用 0.8.0 的历史版本对比和首页直接编辑。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，尚未上传 GitHub Release。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
+适用于 Windows 10 / 11 x64。下载 EXE 后双击进入中文安装向导，安装后从开始菜单打开“我的文档库”。安装和日常使用无需联网，也无需另外安装 Node.js、npm、数据库服务、Office 或 WebView2；离线电脑可通过 U 盘携带安装包。普通使用不需要下载 GitHub 自动生成的 Source code。
+
+本地构建产物位于 `release/0.8.1/local-docs-0.8.1-x64-setup.exe`。发布包不包含用户资料库或个人文档，新电脑首次运行创建空文档库；已有资料请通过应用的“完整备份 → 恢复”自行迁移。
+
+这是 **0.8.1 测试版 EXE**。移除 Office 页面重复的“编辑内容”按钮，改用“编辑中 / 阅读中”文字说明状态，仅显示可执行的切换操作。沿用 0.8.0 的历史版本对比和首页直接编辑。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，已通过 GitHub Releases 发布，附有 SHA-256 校验文件。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
 
 ## 当前阶段
 
