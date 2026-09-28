@@ -212,13 +212,16 @@ describe('文档库持久化与文件保护', () => {
     expect(() => library.restoreVersion(a.id, library.versions(b.id)[0].id, 1)).toThrow('不存在')
   })
 
-  test('错误编码与不支持的类型不会产生文档记录', () => {
+  test('错误 Markdown 编码拒绝导入，其他文件只保存不执行', () => {
     const invalid = join(directory, '编码.md')
     writeFileSync(invalid, Buffer.from([0xff, 0xfe, 0x81]))
     expect(() => library.importFile(invalid, null)).toThrow('UTF-8')
     const unsupported = join(directory, '程序.exe')
     writeFileSync(unsupported, 'test')
-    expect(() => library.importFile(unsupported, null)).toThrow('当前支持')
-    expect(library.snapshot().documents).toHaveLength(0)
+    const stored = library.importFile(unsupported, null)
+    expect(library.readDocument(stored.id).text).toBeNull()
+    expect(readFileSync(library.documentPath(stored.id), 'utf8')).toBe('test')
+    expect(() => library.saveDraft(stored.id, '[]', 1, 'office')).toThrow('草稿类型')
+    expect(library.snapshot().documents).toHaveLength(1)
   })
 })

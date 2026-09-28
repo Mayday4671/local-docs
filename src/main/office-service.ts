@@ -73,6 +73,8 @@ export class OfficeService {
   async readVersion(id: string, versionId: string): Promise<VersionContent> {
     const { path, ...source } = this.library.versionSource(id, versionId)
     if (source.text !== null) return { ...source, office: null }
+    if (!['.docx', '.xlsx'].includes(source.extension))
+      throw new Error('此类型暂不支持历史内容对比，文件仍可原样导出。')
     // Historical reads share the bounded worker queue but never replace the current index.
     const task = this.queue.then(async () => {
       if (this.disposed) throw new Error('文档库已关闭。')

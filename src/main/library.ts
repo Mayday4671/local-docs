@@ -13,6 +13,8 @@ import {
 } from 'node:fs'
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
+import { fileKind, canEditFile } from '../shared/file-types'
+import { plainTextPreview, plainTextIndex } from './text-preview'
 import { emptyState, validateAnnotation, validateState } from './document-state'
 import { newOfficeFile } from './office-edit'
 import { validateManifest, type BackupManifest, type BackupVersion } from './backup-format'
@@ -34,7 +36,7 @@ import type {
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024
 const MAX_TEXT_SIZE = 5 * 1024 * 1024
-const EXTENSIONS = new Set(['.md', '.markdown', '.docx', '.xlsx'])
+
 type Row = Record<string, string | number | null>
 
 function nameOf(value: unknown): string {
@@ -255,7 +257,9 @@ export class Library {
       for (const d of m.documents) {
         const text = ['.md', '.markdown'].includes(d.extension)
           ? decodeText(readFileSync(this.objectPath(d.blobHash)))
-          : ''
+          : fileKind(d.extension) === 'text' && d.size <= MAX_TEXT_SIZE
+            ? plainTextIndex(d.extension, readFileSync(this.objectPath(d.blobHash)))
+            : ''
         insert.run(
           d.id,
           d.name,
@@ -346,7 +350,10 @@ export class Library {
     const row = this.row(id)
     if (row.deleted_at || row.revision !== revision)
       throw new Error('文档已变化，草稿未覆盖旧版本，请先保存或重新打开。')
-    if ((kind === 'markdown') !== ['.md', '.markdown'].includes(String(row.extension)))
+    if (
+      !canEditFile(String(row.extension)) ||
+      (kind === 'markdown') !== ['.md', '.markdown'].includes(String(row.extension))
+    )
       throw new Error('草稿类型与文档不匹配。')
     const state = this.documentState(id)
     state.draft = { text, revision, kind, updatedAt: new Date().toISOString() }
@@ -686,7 +693,6 @@ export class Library {
     this.category(categoryId)
     const name = nameOf(filename)
     const extension = extname(name).toLowerCase()
-    if (!EXTENSIONS.has(extension)) throw new Error('当前支持 DOCX、XLSX 和 Markdown 文件。')
     if (bytes.length > MAX_FILE_SIZE) throw new Error('文件超过 100 MB。')
     if (extension === '.md' || extension === '.markdown') decodeText(bytes)
     if (duplicates !== 'skip' && duplicates !== 'keep') throw new Error('无效的重复文件处理方式。')
@@ -696,13 +702,15 @@ export class Library {
       )
       .all(categoryId) as { name: string; blob_hash: string }[]
     const hash = createHash('sha256').update(bytes).digest('hex')
-    const stem = name.slice(0, -extension.length)
+    const stem = extension ? name.slice(0, -extension.length) : name
     // Generated copy names also count as duplicates on retry, even when the original name had different content.
     const isCopyName = (candidate: string) => {
       const lower = candidate.toLocaleLowerCase()
       if (lower === name.toLocaleLowerCase()) return true
       if (!lower.endsWith(extension)) return false
-      const copy = candidate.slice(0, -extension.length).match(/（([2-9]|[1-9]\d+)）$/)
+      const copy = (extension ? candidate.slice(0, -extension.length) : candidate).match(
+        /（([2-9]|[1-9]\d+)）$/,
+      )
       if (!copy) return false
       const suffix = `${copy[0]}${extension}`
       return lower === `${stem.slice(0, 180 - suffix.length)}${suffix}`.toLocaleLowerCase()
@@ -730,7 +738,9 @@ export class Library {
     reason: string,
   ): DocumentRecord {
     this.category(categoryId)
-    const text = ['.md', '.markdown'].includes(extension) ? decodeText(bytes) : ''
+    const text = ['.md', '.markdown'].includes(extension)
+      ? decodeText(bytes)
+      : plainTextIndex(extension, bytes)
     const hash = this.putObject(bytes)
     const id = randomUUID()
     const now = new Date().toISOString()
@@ -754,7 +764,6 @@ export class Library {
     if (!info.isFile() || info.isSymbolicLink()) throw new Error('请选择普通文件。')
     if (info.size > MAX_FILE_SIZE) throw new Error('当前开发版单文件最大支持 100 MB。')
     const extension = extname(path).toLowerCase()
-    if (!EXTENSIONS.has(extension)) throw new Error('当前支持 DOCX、XLSX 和 Markdown 文件。')
     if (['.md', '.markdown'].includes(extension) && info.size > MAX_TEXT_SIZE)
       throw new Error('Markdown 文件最大支持 5 MB。')
     const bytes = readFileSync(path)
@@ -795,8 +804,20 @@ export class Library {
     const row = this.row(id)
     const text = ['.md', '.markdown'].includes(String(row.extension))
       ? decodeText(readFileSync(this.objectPath(String(row.blob_hash))))
-      : null
+      : fileKind(String(row.extension)) === 'text' && Number(row.size) <= MAX_TEXT_SIZE
+        ? plainTextPreview(readFileSync(this.objectPath(String(row.blob_hash))))
+        : null
     return { document: this.record(row), text }
+  }
+
+  readFilePreview(id: string): Uint8Array {
+    const row = this.row(id)
+    if (!['pdf', 'image'].includes(fileKind(String(row.extension))))
+      throw new Error('此文件不使用图像预览。')
+    if (Number(row.size) > 30 * 1024 ** 2)
+      throw new Error('文件已保存。超过 30 MB 的 PDF / 图片请导出后使用本地软件阅读。')
+    const bytes = readFileSync(this.objectPath(String(row.blob_hash)))
+    return new Uint8Array(bytes)
   }
 
   openDocument(id: string): DocumentContent {
@@ -956,7 +977,11 @@ export class Library {
       hash: version.hash,
       extension,
       path,
-      text: ['.md', '.markdown'].includes(extension) ? decodeText(readFileSync(path)) : null,
+      text: ['.md', '.markdown'].includes(extension)
+        ? decodeText(readFileSync(path))
+        : fileKind(extension) === 'text'
+          ? plainTextPreview(readFileSync(path))
+          : null,
     }
   }
 
@@ -971,9 +996,11 @@ export class Library {
     const bytes = readFileSync(this.objectPath(version.blob_hash))
     const text = ['.md', '.markdown'].includes(String(row.extension))
       ? decodeText(bytes)
-      : (this.officeCache(id, version.blob_hash)
-          ?.data?.blocks.map((block) => block.text)
-          .join('\n') ?? '')
+      : fileKind(String(row.extension)) === 'text'
+        ? plainTextIndex(String(row.extension), bytes)
+        : (this.officeCache(id, version.blob_hash)
+            ?.data?.blocks.map((block) => block.text)
+            .join('\n') ?? '')
     const now = new Date().toISOString()
     this.transaction(() => {
       this.db

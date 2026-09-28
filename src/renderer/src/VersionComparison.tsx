@@ -154,7 +154,7 @@ export function VersionComparison({
           ? '对比段落文字（含表格内文字、页眉页脚等）。空白段落、字体、排版和图片变化暂不展开。'
           : name.toLowerCase().endsWith('.xlsx')
             ? '对比工作表、单元格值与公式；公式结果为文件中保存的结果。单元格样式、图片和图表变化暂不展开。'
-            : '按文本行对比 Markdown 源码，忽略 Windows / Unix 换行符差别；图片显示为引用地址。'}
+            : '按文本行对比内容，忽略 Windows / Unix 换行符差别；图片显示为引用地址。'}
       </p>
       <div className="comparison-content" ref={scroll}>
         {error && (

@@ -1,0 +1,162 @@
+.file-reader-page {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.plain-text-reader,
+.pdf-text pre {
+  margin: 0;
+  padding: 24px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    14px/1.8 Consolas,
+    'Microsoft YaHei',
+    monospace;
+  tab-size: 4;
+  background: var(--surface);
+  color: var(--text);
+  min-height: 100%;
+}
+.plain-text-reader {
+  user-select: text;
+}
+.file-fallback {
+  min-height: 260px;
+  padding: 36px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  color: var(--muted);
+}
+.file-fallback strong {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.file-fallback p {
+  margin: 0;
+  max-width: 540px;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+.image-reader {
+  padding: 16px;
+  text-align: center;
+}
+.image-reader img {
+  max-width: 100%;
+  height: auto;
+}
+.pdf-reader {
+  min-height: 100%;
+  background: var(--surface-muted);
+}
+.pdf-tools {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.pdf-tools button,
+.pdf-tools select {
+  padding: 6px 10px;
+  min-height: 32px;
+  font-size: 12px;
+}
+.pdf-tools span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.pdf-canvas {
+  padding: 16px;
+  text-align: center;
+}
+.pdf-canvas canvas {
+  display: block;
+  margin: auto;
+  box-shadow: 0 2px 12px var(--shadow);
+  background: white;
+}
+.pdf-text summary {
+  cursor: pointer;
+  padding: 14px;
+  color: var(--accent);
+}
+.extra-file-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.extra-file-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.extra-file-icon small {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--surface);
+  line-height: 1.1;
+}
+.extra-file-icon.pdf {
+  color: var(--danger);
+}
+.extra-file-icon.text {
+  color: var(--accent);
+}
+.extra-file-icon.image {
+  color: var(--warning);
+}
+.extra-file-icon.large small {
+  font-size: 13px;
+}
+.file-drop-overlay {
+  position: fixed;
+  inset: 80px 12px 12px;
+  z-index: 500;
+  pointer-events: none;
+  border: 3px dashed var(--accent);
+  border-radius: 12px;
+  background: var(--overlay);
+  display: grid;
+  place-items: center;
+}
+.file-drop-overlay > div {
+  padding: 32px;
+  max-width: 80%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px var(--shadow);
+}
+.file-drop-overlay strong {
+  font-size: 20px;
+}
+.file-drop-overlay span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.plain-text-reader:empty::after {
+  content: '（空文件）';
+  color: var(--muted);
+}

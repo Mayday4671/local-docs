@@ -82,8 +82,14 @@ test('完整备份跨文档库恢复：字节、层级、历史、回收站、�
   }
 }, 20_000)
 
-test('Word、Excel 和两种 Markdown 扩展名备份/导出保持字节一致', async () => {
+test('所有支持的文件与无扩展名文件备份/导出保持字节一致', async () => {
   const payloads = {
+    'PDF.pdf': Buffer.from('%PDF-1.4 synthetic'),
+    '说明.txt': Buffer.from('文本备份搜索'),
+    '语句.sql': Buffer.from('SELECT 1; -- 合成SQL'),
+    '配置.json': Buffer.from('{"test":true}'),
+    '归档.zip': Buffer.from([0x50, 0x4b, 0, 1, 2]),
+    无扩展名: Buffer.from('no extension'),
     '文档.docx': wordFixture(),
     '表格.xlsx': sheetFixture(),
     '笔记.md': Buffer.from('# 标题\r\n内容'),
@@ -97,6 +103,8 @@ test('Word、Excel 和两种 Markdown 扩展名备份/导出保持字节一致',
   const path = await archive()
   const prepared = await transfer.preview(path)
   await transfer.restore(prepared.token)
+  expect(library.search('文本备份搜索')).toHaveLength(1)
+  expect(library.search('合成SQL')).toHaveLength(1)
   const result = await transfer.export(root, { kind: 'all' })
   for (const [name, bytes] of Object.entries(payloads))
     expect(readFileSync(join(result.path, '未分类', name))).toEqual(Buffer.from(bytes))

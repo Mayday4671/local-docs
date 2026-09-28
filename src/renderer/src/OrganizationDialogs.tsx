@@ -202,7 +202,7 @@ export function CategoryDialog({
               value={destination}
               onChange={setDestination}
               label="文件转移到"
-              rootLabel="未分类"
+              rootLabel="不指定分类（在全部文件中查看）"
               exclude={excluded}
             />
           </fieldset>
@@ -295,7 +295,7 @@ export function MoveDialog({
           value={destination}
           onChange={setDestination}
           label="目标分类"
-          rootLabel="未分类"
+          rootLabel="不指定分类（在全部文件中查看）"
         />
       </fieldset>
       {error}
@@ -343,7 +343,7 @@ export function FolderPreviewDialog({
         <span>{fileSize(preview.bytes)}</span>
       </div>
       <p className="muted">
-        保留“{preview.rootName}”及子目录结构，包含空文件夹。复制 DOCX、XLSX、Markdown
+        保留“{preview.rootName}”及子目录结构，包含空文件夹。复制文档、PDF、文本等所有普通
         文件，原文件保持不变。
       </p>
       <CategorySelect

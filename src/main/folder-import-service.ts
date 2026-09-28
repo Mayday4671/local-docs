@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { lstat, open, readdir, realpath } from 'node:fs/promises'
-import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { setImmediate as yieldToEvents } from 'node:timers/promises'
 import type { FolderImportPreview, FolderImportResult, OperationStatus } from '../shared/types'
 import { Library } from './library'
@@ -14,7 +14,6 @@ type Plan = {
   files: Entry[]
   skipped: number
 }
-const supported = new Set(['.md', '.markdown', '.docx', '.xlsx'])
 const limitFor = (path: string) => (/\.(md|markdown)$/i.test(path) ? 5 : 100) * 1024 * 1024
 const key = (path: string) => (process.platform === 'win32' ? path.toLowerCase() : path)
 function inside(root: string, path: string) {
@@ -117,15 +116,8 @@ export class FolderImportService {
           for (const child of children.sort((a, b) => a.localeCompare(b, 'zh-CN')))
             await walk(join(path, child), depth + 1)
         } else if (info.isFile()) {
-          if (!supported.has(extname(path).toLowerCase())) {
-            skip(path, '暂不支持此文件类型')
-            return
-          }
           if (info.size > limitFor(path)) {
-            skip(
-              path,
-              /\.(md|markdown)$/i.test(path) ? 'Markdown 超过 5 MB' : 'Office 文件超过 100 MB',
-            )
+            skip(path, /\.(md|markdown)$/i.test(path) ? 'Markdown 超过 5 MB' : '文件超过 100 MB')
             return
           }
           if (plan.files.length >= 5000) throw new Error('支持的文件超过 5000 份，请分批导入。')

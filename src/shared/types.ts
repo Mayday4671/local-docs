@@ -1,5 +1,4 @@
-export type LibraryView =
-  'all' | 'recent' | 'favorites' | 'marked' | 'uncategorized' | 'trash' | `category:${string}`
+export type LibraryView = 'all' | 'recent' | 'favorites' | 'marked' | 'trash' | `category:${string}`
 export interface Category {
   id: string
   name: string
@@ -126,6 +125,8 @@ export interface LibraryApi {
   searchResults(query: string): Promise<SearchHit[]>
   readOffice(id: string, includeLayout?: boolean): Promise<OfficePreview>
   importFiles(categoryId: string | null): Promise<ImportResult>
+  importDroppedFiles(paths: string[], categoryId: string | null): Promise<ImportResult>
+  readFilePreview(id: string): Promise<Uint8Array>
   createMarkdown(name: string, categoryId: string | null): Promise<DocumentRecord>
   createCategory(name: string, parentId?: string | null): Promise<Category>
   copyDocumentPath(id: string): Promise<void>
@@ -184,6 +185,8 @@ export const IPC = {
   searchResults: 'library:search-results',
   readOffice: 'library:read-office',
   importFiles: 'library:import',
+  importDroppedFiles: 'library:import-dropped',
+  readFilePreview: 'library:file-preview',
   createMarkdown: 'library:create-markdown',
   createCategory: 'library:create-category',
   copyDocumentPath: 'library:copy-path',

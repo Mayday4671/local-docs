@@ -17,7 +17,7 @@ await writeFile(
   join(source, '开发', '记录.md'),
   '| 项目 | 状态 |\n| --- | --- |\n| 文件夹导入 | 完成 |',
 )
-await writeFile(join(source, '忽略.txt'), '不支持的合成测试资料')
+await writeFile(join(source, '说明.txt'), '合成文本测试资料')
 const errors = [],
   network = []
 let app
@@ -124,7 +124,7 @@ try {
   await expect(page.getByRole('dialog')).toHaveCount(0)
   expect(await page.evaluate(() => window.localDocs.snapshot())).toEqual(before)
   await chooseFolder(page)
-  await expect(page.locator('.folder-stats')).toContainText('3 份文件')
+  await expect(page.locator('.folder-stats')).toContainText('4 份文件')
   await page.getByText('查看目录预览（最多显示 100 项）', { exact: true }).click()
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1000, 650))
   const start = page.getByRole('button', { name: '开始导入', exact: true })
@@ -135,13 +135,13 @@ try {
   await page.screenshot({ path: join(results, 'organization-import-dark.png') })
   await start.click()
   await expect(page.getByRole('heading', { name: '文件夹导入完成', exact: true })).toBeVisible()
-  await expect(page.locator('.folder-stats')).toContainText('3 份已导入')
+  await expect(page.locator('.folder-stats')).toContainText('4 份已导入')
   await expect(page.locator('.folder-stats')).toContainText('0 项失败')
   await page
     .getByRole('dialog', { name: '文件夹导入完成', exact: true })
     .getByRole('button', { name: '查看本批文件', exact: true })
     .click()
-  await expect(page.locator('.file-table tbody tr')).toHaveCount(3)
+  await expect(page.locator('.file-table tbody tr')).toHaveCount(4)
   await page.getByRole('row', { name: /记录.md/ }).click()
   await expect(
     page.getByRole('region', { name: 'Markdown 表格', exact: true }).getByRole('table'),
@@ -161,7 +161,7 @@ try {
   await expect(page.locator('.folder-stats')).toContainText('0 份已导入')
   await expect(page.locator('.folder-stats')).toContainText('4 项跳过')
   await page.getByRole('button', { name: '关闭', exact: true }).click()
-  await expect(page.locator('.file-table tbody tr')).toHaveCount(5)
+  await expect(page.locator('.file-table tbody tr')).toHaveCount(6)
   await chooseFolder(page)
   await page.getByLabel('导入到', { exact: true }).selectOption(seed.archive.id)
   await writeFile(join(source, '开发', '记录.md'), '预览后修改的内容')

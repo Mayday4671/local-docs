@@ -1,6 +1,13 @@
 import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
+import { cpSync, mkdirSync } from 'node:fs'
+
+// Generated local assets are copied by Vite in both development and packaged builds.
+const pdfAssets = resolve('src/renderer/public/pdf-assets')
+mkdirSync(pdfAssets, { recursive: true })
+for (const name of ['cmaps', 'standard_fonts', 'wasm', 'iccs', 'LICENSE'])
+  cpSync(resolve('node_modules/pdfjs-dist', name), resolve(pdfAssets, name), { recursive: true })
 
 export default defineConfig({
   main: {

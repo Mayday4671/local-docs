@@ -7,6 +7,8 @@ import type {
   ContentLocation,
   DocumentRecord,
 } from '../../shared/types'
+import { fileKind, fileTypeName } from '../../shared/file-types'
+import { FileReader } from './FileReader'
 import { Markdown } from './Markdown'
 import { OfficeReader, locationLabel } from './OfficeReader'
 
@@ -77,13 +79,16 @@ export function ReadingPane({
     [found, setFound] = useState(0)
   const [paint, setPaint] = useState(0)
   const markdown = ['.md', '.markdown'].includes(doc.extension)
+  const kind = fileKind(doc.extension)
+  const textLike = markdown || kind === 'text'
+  const canMark = textLike || kind === 'office'
   useEffect(() => {
-    if (markdown) {
+    if (textLike) {
       setFind(query)
       setFindIndex(0)
       setJump(null)
     }
-  }, [query, markdown, doc.id])
+  }, [query, textLike, doc.id])
   const highlightId = useRef(`reading-${Math.random().toString(36).slice(2)}`).current
   useEffect(() => {
     if (showMarks) setPanel(true)
@@ -222,42 +227,44 @@ export function ReadingPane({
   }
   return (
     <div className={`reading-pane ${compact ? 'compact' : ''}`}>
-      <div className="reading-tools">
-        <button
-          className="secondary"
-          disabled={disabled || !selection || !!doc.deletedAt}
-          title={disabled ? '请先保存文档修改再添加标记' : '选中文字或单元格后标记'}
-          onClick={() => setEditing(selection)}
-        >
-          <Highlighter size={15} />
-          标记所选内容
-        </button>
-        <button className="secondary" aria-pressed={panel} onClick={() => setPanel(!panel)}>
-          标记 {marks.length}
-        </button>
-        <label className="reader-find">
-          <Search size={14} />
-          <input
-            aria-label="文内查找"
-            placeholder="查找当前页"
-            value={find}
-            onChange={(e) => {
-              setFind(e.target.value)
-              setFindIndex(0)
-              setJump(null)
-            }}
-          />
-        </label>
-        {find && (
+      {canMark && (
+        <div className="reading-tools">
           <button
             className="secondary"
-            disabled={!found}
-            onClick={() => setFindIndex((v) => v + 1)}
+            disabled={disabled || !selection || !!doc.deletedAt}
+            title={disabled ? '请先保存文档修改再添加标记' : '选中文字或单元格后标记'}
+            onClick={() => setEditing(selection)}
           >
-            {found ? `${(findIndex % found) + 1}/${found}` : '0'} 下一处
+            <Highlighter size={15} />
+            标记所选内容
           </button>
-        )}
-      </div>
+          <button className="secondary" aria-pressed={panel} onClick={() => setPanel(!panel)}>
+            标记 {marks.length}
+          </button>
+          <label className="reader-find">
+            <Search size={14} />
+            <input
+              aria-label="文内查找"
+              placeholder="查找当前页"
+              value={find}
+              onChange={(e) => {
+                setFind(e.target.value)
+                setFindIndex(0)
+                setJump(null)
+              }}
+            />
+          </label>
+          {find && (
+            <button
+              className="secondary"
+              disabled={!found}
+              onClick={() => setFindIndex((v) => v + 1)}
+            >
+              {found ? `${(findIndex % found) + 1}/${found}` : '0'} 下一处
+            </button>
+          )}
+        </div>
+      )}
       {doc.extension === '.docx' && (
         <p className="reading-hint">标记文字或查找时，请切换到“正文”。</p>
       )}
@@ -333,7 +340,7 @@ export function ReadingPane({
                   setJump({ ...a })
                   setError('')
                   setFind('')
-                  if (markdown) {
+                  if (textLike) {
                     const scope = root.current!.querySelector('[data-mark-scope="markdown"]')
                     if (scope && resolveOffset(scope.textContent || '', a) < 0)
                       setError('原文已变化或存在重复片段，暂时无法准确定位；标记内容仍保留。')
@@ -343,7 +350,7 @@ export function ReadingPane({
                 {a.quote}
               </button>
               <small>
-                {locationLabel(a.location) || 'Markdown 正文'}
+                {locationLabel(a.location) || `${fileTypeName(doc.extension)} 正文`}
                 {a.revision !== doc.revision ? ' · 标记后文档有更新' : ''}
               </small>
               {a.note && <p>{a.note}</p>}
@@ -401,7 +408,7 @@ export function ReadingPane({
       >
         {markdown ? (
           <Markdown text={text || ''} documentId={doc.id} attachments={attachments ?? images} />
-        ) : (
+        ) : kind === 'office' ? (
           <OfficeReader
             key={`${doc.id}:${jump?.id || ''}`}
             id={doc.id}
@@ -410,6 +417,8 @@ export function ReadingPane({
             query={query}
             location={jump?.location || location}
           />
+        ) : (
+          <FileReader doc={doc} text={text} />
         )}
       </div>
     </div>

@@ -13,7 +13,8 @@ import {
 } from 'electron'
 import { basename, isAbsolute, join, relative, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { readFileSync, statSync } from 'node:fs'
+import { lstatSync, readFileSync, statSync } from 'node:fs'
+import { setImmediate as yieldToEvents } from 'node:timers/promises'
 import { officeEditModel, applyOfficeChanges } from './office-edit'
 import { Library } from './library'
 import { OfficeService } from './office-service'
@@ -116,6 +117,35 @@ function registerApi(
 ): void {
   let queue: Promise<unknown> = Promise.resolve()
   let generation = 0
+  const importPaths = async (paths: string[], categoryId: string | null): Promise<ImportResult> => {
+    if (
+      !Array.isArray(paths) ||
+      paths.length > 500 ||
+      paths.some((p) => typeof p !== 'string' || !isAbsolute(p))
+    )
+      throw new Error('请选择本地文件，每次最多 500 份。')
+    paths = [...new Set(paths)]
+    let totalBytes = 0
+    const result: ImportResult = { imported: [], failures: [] }
+    for (const path of paths) {
+      try {
+        const size = lstatSync(path).size
+        if (size + totalBytes > 2 * 1024 ** 3)
+          throw new Error('本批已达到 2 GB 上限，请分批导入剩余文件。')
+        const imported = store.importFile(path, categoryId)
+        totalBytes += imported.size
+        result.imported.push(imported.id)
+        if (['.docx', '.xlsx'].includes(imported.extension)) await office.ensure(imported.id)
+      } catch (error) {
+        result.failures.push({
+          name: basename(path),
+          reason: error instanceof Error ? error.message : '导入失败',
+        })
+      }
+      await yieldToEvents()
+    }
+    return result
+  }
   const api: LibraryApi = {
     createOffice: async (name, extension, categoryId) =>
       store.createOffice(name, extension, categoryId),
@@ -245,24 +275,20 @@ function registerApi(
       const choice = await dialog.showOpenDialog(window!, {
         title: '添加到我的文档库',
         properties: ['openFile', 'multiSelections'],
-        filters: [{ name: '支持的文档', extensions: ['docx', 'xlsx', 'md', 'markdown'] }],
+        filters: [
+          { name: '所有文件', extensions: ['*'] },
+          {
+            name: '常用文档',
+            extensions: ['docx', 'xlsx', 'md', 'markdown', 'pdf', 'txt', 'sql', 'csv', 'json'],
+          },
+        ],
       })
-      const result: ImportResult = { imported: [], failures: [] }
-      if (choice.canceled) return result
-      for (const path of choice.filePaths) {
-        try {
-          const imported = store.importFile(path, categoryId)
-          result.imported.push(imported.id)
-          if (['.docx', '.xlsx'].includes(imported.extension)) await office.ensure(imported.id)
-        } catch (error) {
-          result.failures.push({
-            name: basename(path),
-            reason: error instanceof Error ? error.message : '导入失败',
-          })
-        }
-      }
-      return result
+      return choice.canceled
+        ? { imported: [], failures: [] }
+        : importPaths(choice.filePaths, categoryId)
     },
+    importDroppedFiles: importPaths,
+    readFilePreview: async (id) => store.readFilePreview(id),
     createMarkdown: async (name, categoryId) => store.createMarkdown(name, categoryId),
     createCategory: async (name, parentId) => store.createCategory(name, parentId ?? null),
     copyDocumentPath: async (id) => clipboard.writeText(store.documentPath(id)),

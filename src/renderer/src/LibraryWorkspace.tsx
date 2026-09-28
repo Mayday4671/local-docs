@@ -13,7 +13,6 @@ import {
   FolderOpen,
   Home,
   Highlighter,
-  Inbox,
   Info,
   LayoutGrid,
   List,
@@ -40,13 +39,13 @@ import type {
   SearchHit,
   ExportScope,
 } from '../../shared/types'
+import { fileKind, canEditFile, fileTypeName } from '../../shared/file-types'
 import { Highlight, locationLabel } from './OfficeReader'
 import { ReadingPane } from './ReadingPane'
 import { ResizableSplit } from './ResizableSplit'
 
 type Patch = Parameters<LibraryApi['updateDocument']>[1]
-export const fileType = (doc: DocumentRecord) =>
-  doc.extension === '.docx' ? 'Word' : doc.extension === '.xlsx' ? 'Excel' : 'Markdown'
+export const fileType = (doc: DocumentRecord) => fileTypeName(doc.extension)
 export const fileSize = (size: number) =>
   size < 1024
     ? `${size} B`
@@ -71,6 +70,16 @@ export function categoryPath(categories: Category[], id: string | null): Categor
   return path
 }
 function FileIcon({ doc, large = false }: { doc: DocumentRecord; large?: boolean }) {
+  if (!canEditFile(doc.extension))
+    return (
+      <span
+        className={`document-icon extra-file-icon ${fileKind(doc.extension)} ${large ? 'large' : ''}`}
+        aria-hidden="true"
+      >
+        <FileText />
+        <small>{doc.extension.slice(1).toUpperCase().slice(0, 5) || 'FILE'}</small>
+      </span>
+    )
   return (
     <img
       className={`document-icon ${fileType(doc).toLowerCase()} ${large ? 'large' : ''}`}
@@ -427,17 +436,7 @@ export function LibraryWorkspace(p: Props) {
             <Plus size={22} />
           </button>
         </div>
-        <div className="category-list">
-          {tree()}
-          <button
-            className={`nav-item uncategorized ${p.view === 'uncategorized' ? 'active' : ''}`}
-            onClick={() => p.onNavigate('uncategorized')}
-          >
-            <Inbox size={20} />
-            <span>未分类</span>
-            <em>{active.filter((doc) => !doc.categoryId).length}</em>
-          </button>
-        </div>
+        <div className="category-list">{tree()}</div>
         <button className="nav-item settings-nav" onClick={p.onSettings}>
           <Settings size={22} />
           <span>设置</span>
@@ -559,6 +558,9 @@ export function LibraryWorkspace(p: Props) {
                         <option>Word</option>
                         <option>Excel</option>
                         <option>Markdown</option>
+                        {['PDF', 'TXT', 'SQL', '文本', '图片', '其他'].map((type) => (
+                          <option key={type}>{type}</option>
+                        ))}
                       </select>
                     </label>
                     <label>
@@ -671,7 +673,9 @@ export function LibraryWorkspace(p: Props) {
                         : '这里还没有文件'}
                   </h2>
                   <p>
-                    {p.query ? '试试其他关键词，或清除搜索。' : '添加文件，开始整理你的本地文档。'}
+                    {p.query
+                      ? '试试其他关键词，或清除搜索。'
+                      : '点击添加，或直接拖入 PDF、TXT、SQL 等文件。'}
                   </p>
                   {p.view !== 'trash' && (
                     <button className="primary" onClick={p.onImport} disabled={p.busy}>
@@ -926,7 +930,7 @@ export function LibraryWorkspace(p: Props) {
                               update(p.selected!, { categoryId: event.target.value || null })
                             }
                           >
-                            <option value="">未分类</option>
+                            <option value="">不指定分类</option>
                             {p.snapshot.categories.map((category) => (
                               <option key={category.id} value={category.id}>
                                 {categoryPath(p.snapshot.categories, category.id)
@@ -974,15 +978,17 @@ export function LibraryWorkspace(p: Props) {
                           <FolderOpen size={19} />
                           打开
                         </button>
-                        <button
-                          className="secondary"
-                          disabled={p.busy}
-                          title={`编辑 ${fileType(p.selected)}`}
-                          onClick={() => p.onOpen(p.selected!, 'edit')}
-                        >
-                          <Pencil size={18} />
-                          编辑
-                        </button>
+                        {canEditFile(p.selected.extension) && (
+                          <button
+                            className="secondary"
+                            disabled={p.busy}
+                            title={`编辑 ${fileType(p.selected)}`}
+                            onClick={() => p.onOpen(p.selected!, 'edit')}
+                          >
+                            <Pencil size={18} />
+                            编辑
+                          </button>
+                        )}
                       </>
                     )}
                     <button

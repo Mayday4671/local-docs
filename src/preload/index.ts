@@ -1,7 +1,7 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { IPC, type LibraryApi } from '../shared/types'
 
-const api: LibraryApi = {
+const api: Omit<LibraryApi, 'importDroppedFiles'> = {
   createOffice: (name, extension, categoryId) =>
     ipcRenderer.invoke(IPC.createOffice, name, extension, categoryId),
   annotations: (id) => ipcRenderer.invoke(IPC.annotations, id),
@@ -39,6 +39,7 @@ const api: LibraryApi = {
   search: (query) => ipcRenderer.invoke(IPC.search, query),
   searchResults: (query) => ipcRenderer.invoke(IPC.searchResults, query),
   readOffice: (id, includeLayout) => ipcRenderer.invoke(IPC.readOffice, id, includeLayout),
+  readFilePreview: (id) => ipcRenderer.invoke(IPC.readFilePreview, id),
   importFiles: (categoryId) => ipcRenderer.invoke(IPC.importFiles, categoryId),
   createMarkdown: (name, categoryId) => ipcRenderer.invoke(IPC.createMarkdown, name, categoryId),
   createCategory: (name, parentId) => ipcRenderer.invoke(IPC.createCategory, name, parentId),
@@ -56,3 +57,11 @@ const api: LibraryApi = {
     ipcRenderer.invoke(IPC.restoreVersion, id, versionId, revision),
 }
 contextBridge.exposeInMainWorld('localDocs', Object.freeze(api))
+
+// Only native File objects cross this bridge; renderer code never supplies arbitrary paths.
+contextBridge.exposeInMainWorld('localFileImport', (files: File[], categoryId: string | null) => {
+  if (!Array.isArray(files) || files.length > 500) throw new Error('每次最多拖入 500 份文件。')
+  const paths = files.map((file) => webUtils.getPathForFile(file))
+  if (paths.some((path) => !path)) throw new Error('请从电脑的文件夹拖入文件。')
+  return ipcRenderer.invoke(IPC.importDroppedFiles, paths, categoryId)
+})

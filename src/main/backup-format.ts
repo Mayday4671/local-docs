@@ -109,10 +109,7 @@ export function validateManifest(value: unknown): BackupManifest {
   const referenced = new Set<string>()
   for (const d of m.documents) {
     requireValid(isRecord(d) && isId(d.id) && isName(d.name) && !documents.has(d.id))
-    requireValid(
-      ['.md', '.markdown', '.docx', '.xlsx'].includes(d.extension) &&
-        extname(d.name).toLowerCase() === d.extension,
-    )
+    requireValid(typeof d.extension === 'string' && extname(d.name).toLowerCase() === d.extension)
     requireValid(d.categoryId === null || categories.has(d.categoryId))
     requireValid(
       typeof d.favorite === 'boolean' &&
@@ -141,7 +138,9 @@ export function validateManifest(value: unknown): BackupManifest {
       const state = validateState(d.state!, d.id)
       if (state.draft)
         requireValid(
-          state.draft.kind === (['.md', '.markdown'].includes(d.extension) ? 'markdown' : 'office'),
+          ['.md', '.markdown', '.docx', '.xlsx'].includes(d.extension) &&
+            state.draft.kind ===
+              (['.md', '.markdown'].includes(d.extension) ? 'markdown' : 'office'),
         )
       for (const a of state.attachments) {
         requireValid(objects.get(a.hash) === a.size)

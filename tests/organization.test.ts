@@ -120,22 +120,22 @@ test('分类创建和移动遵守备份可恢复的层级上限', () => {
   expect(library.backupManifest().categories).toHaveLength(129)
 })
 
-test('文件夹预览只读；三类文件与空目录保留，原文件字节不变，备份可恢复', async () => {
+test('文件夹预览只读；文档、文本与空目录保留，原文件字节不变，备份可恢复', async () => {
   mkdirSync(join(source, '子分类', '空目录'), { recursive: true })
   const word = Buffer.from(wordFixture()),
     sheet = Buffer.from(sheetFixture())
   const wordPath = file('说明.docx', word),
     sheetPath = file('数据.xlsx', sheet)
   file('子分类/笔记.markdown', '| 项目 | 状态 |\n| --- | --- |\n| 合成资料 | 完成 |')
-  file('不支持.txt', '跳过')
+  file('说明.txt', '文本也能导入')
   const before = library.snapshot()
   const preview = await folders.preview(source)
-  expect(preview).toMatchObject({ files: 3, folders: 3, skipped: 1 })
+  expect(preview).toMatchObject({ files: 4, folders: 3, skipped: 0 })
   expect(library.snapshot()).toEqual(before)
   const parent = library.createCategory('目标位置')
   const result = await folders.import(preview.token, parent.id, 'skip')
-  expect(result).toMatchObject({ skipped: 1, failures: [], cancelled: false })
-  expect(result.imported).toHaveLength(3)
+  expect(result).toMatchObject({ skipped: 0, failures: [], cancelled: false })
+  expect(result.imported).toHaveLength(4)
   const snap = library.snapshot()
   expect(snap.categories.find((c) => c.name === '资料包')!.parentId).toBe(parent.id)
   const child = snap.categories.find((c) => c.name === '子分类')!

@@ -3,3 +3,5 @@ out
 release
 test-results
 package-lock.json
+
+src/renderer/public/pdf-assets

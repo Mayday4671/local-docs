@@ -1,6 +1,6 @@
 {
   "name": "local-docs",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": true,
   "description": "我的文档库：个人离线文档管理桌面应用",
   "author": "Mayday4671",
@@ -29,7 +29,8 @@
     "test:word-edit-fix": "npm run build && node scripts/word-edit-fix-smoke.mjs",
     "test:editor-split": "npm run build && node scripts/editor-split-smoke.mjs",
     "test:library-split": "npm run build && node scripts/library-split-smoke.mjs",
-    "package:win": "npm run build && electron-builder --win nsis --publish never"
+    "package:win": "npm run build && electron-builder --win nsis --publish never",
+    "test:files": "npm run build && node scripts/file-import-smoke.mjs"
   },
   "dependencies": {
     "docx-preview": "0.4.1",
@@ -55,6 +56,7 @@
     "electron": "44.4.5",
     "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
+    "pdfjs-dist": "6.3.289",
     "prettier": "3.9.9",
     "typescript": "5.9.3",
     "vite": "7.3.6",

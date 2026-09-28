@@ -9,6 +9,8 @@ import {
   FolderResultDialog,
   categoryDescendants,
 } from './OrganizationDialogs'
+import { canEditFile, canCompareFile, fileKind, fileTypeName } from '../../shared/file-types'
+import { FileDropZone } from './FileDropZone'
 import { OfficeEditor } from './OfficeEditor'
 import { VersionComparison } from './VersionComparison'
 import { EditorSplit } from './EditorSplit'
@@ -41,11 +43,9 @@ const views = [
   { id: 'recent', label: '最近使用' },
   { id: 'favorites', label: '收藏' },
   { id: 'marked', label: '内容标记' },
-  { id: 'uncategorized', label: '未分类' },
 ] as const
 const isMarkdown = (doc: DocumentRecord) => ['.md', '.markdown'].includes(doc.extension)
-const typeName = (doc: DocumentRecord) =>
-  isMarkdown(doc) ? 'Markdown' : doc.extension === '.docx' ? 'Word' : 'Excel'
+const typeName = (doc: DocumentRecord) => fileTypeName(doc.extension)
 export function App() {
   const [theme, setTheme] = useState<ThemePreference>('system')
   const [themeReady, setThemeReady] = useState(false)
@@ -103,6 +103,7 @@ export function App() {
     savedText: string
     location?: ContentLocation
     initialMode?: 'read' | 'edit'
+    readOnlyText?: string | null
   } | null>(null)
   const [history, setHistory] = useState<VersionRecord[] | null>(null)
   const [comparedVersion, setComparedVersion] = useState<string | null>(null)
@@ -365,6 +366,7 @@ export function App() {
       setDraftStatus('')
       setEditor({
         doc: content.document,
+        readOnlyText: content.text,
         text: content.text ?? '',
         savedText: content.text ?? '',
         location: matches?.find((hit) => hit.id === doc.id)?.location,
@@ -374,7 +376,7 @@ export function App() {
     })
   }
   const save = () => {
-    if (!editor || !dirty || busy) return
+    if (!editor || !canEditFile(editor.doc.extension) || !dirty || busy) return
     void perform(async () => {
       await draftWrite.current
       const doc = isMarkdown(editor.doc)
@@ -419,14 +421,20 @@ export function App() {
     setBatchOnly(false)
     setSelectedId(null)
   }
-  const importFiles = () =>
+  const importFiles = (files?: File[]) =>
     void perform(async () => {
-      const result = await api!.importFiles(categoryId)
+      const result = files
+        ? await window.localFileImport!(files, categoryId)
+        : await api!.importFiles(categoryId)
       if (!result.imported.length && !result.failures.length) return
       setNotice(
         `已添加 ${result.imported.length} 份文件${result.failures.length ? `，${result.failures.length} 份未能添加` : ''}`,
       )
       if (result.imported.length) {
+        setView(categoryId ? `category:${categoryId}` : 'all')
+        setQuery('')
+        setType('all')
+        setBatchOnly(false)
         setBatch(result.imported)
         setSelectedId(result.imported[0])
         setPreviewOpen(true)
@@ -471,7 +479,6 @@ export function App() {
     if (view === 'favorites' && !doc.favorite) return false
     if (view === 'marked' && !snapshot.annotationCounts?.[doc.id]) return false
     if (view === 'recent' && !doc.openedAt) return false
-    if (view === 'uncategorized' && doc.categoryId) return false
     if (categoryId && doc.categoryId !== categoryId) return false
     if (type !== 'all' && typeName(doc) !== type) return false
     if (matches && !matches.some((hit) => hit.id === doc.id)) return false
@@ -493,6 +500,21 @@ export function App() {
 
   return (
     <>
+      <FileDropZone
+        disabled={
+          busy ||
+          loading ||
+          !!editor ||
+          !!modal ||
+          organizing ||
+          transferring ||
+          !!backupPreview ||
+          view === 'trash'
+        }
+        destination={categoryId ? viewLabel : '全部文件'}
+        onFiles={importFiles}
+        onBlocked={() => setNotice('请返回文件列表并完成当前操作后再拖入文件')}
+      />
       <div
         inert={transferring || !!backupPreview || organizing || !!modal}
         style={{ display: editor ? 'none' : undefined }}
@@ -521,7 +543,7 @@ export function App() {
             setPreviewOpen(true)
           }}
           onPreviewToggle={() => setPreviewOpen(!previewOpen)}
-          onImport={importFiles}
+          onImport={() => importFiles()}
           onImportFolder={() =>
             void transfer(async () => {
               const preview = await api.previewFolder()
@@ -592,7 +614,9 @@ export function App() {
                     : '已保存在本地'
                   : dirty
                     ? '有未保存的修改'
-                    : '阅读 / 内容编辑 · 原件保留'}
+                    : canEditFile(editor.doc.extension)
+                      ? '阅读 / 内容编辑 · 原件保留'
+                      : '本地阅读 · 原文件保留'}
               </span>
             </div>
             <button
@@ -626,12 +650,12 @@ export function App() {
               <Star size={17} fill={editor.doc.favorite ? 'currentColor' : 'none'} />
               {editor.doc.favorite ? '已收藏' : '收藏'}
             </button>
-            {
+            {canEditFile(editor.doc.extension) && (
               <button className="primary" disabled={busy || !dirty} onClick={save}>
                 <Save size={16} />
                 保存
               </button>
-            }
+            )}
             {themeControl}
           </header>
           {recovery && (
@@ -751,7 +775,7 @@ export function App() {
                   />
                 </section>
               </EditorSplit>
-            ) : (
+            ) : fileKind(editor.doc.extension) === 'office' ? (
               <OfficeEditor
                 key={editor.doc.id}
                 initialMode={editor.initialMode}
@@ -764,6 +788,16 @@ export function App() {
                 onChange={(text) => setEditor({ ...editor, text })}
                 onChanged={() => void refresh()}
               />
+            ) : (
+              <section className="file-reader-page">
+                <ReadingPane
+                  doc={editor.doc}
+                  text={editor.readOnlyText ?? null}
+                  query={query.trim()}
+                  disabled={busy}
+                  onChanged={() => void refresh()}
+                />
+              </section>
             )}
             {history && (
               <aside className="history-panel">
@@ -782,13 +816,15 @@ export function App() {
                   <div className="history-item" key={version.id}>
                     <strong>{version.reason}</strong>
                     <span>{new Date(version.createdAt).toLocaleString('zh-CN')}</span>
-                    <button
-                      className="secondary"
-                      disabled={busy}
-                      onClick={() => setComparedVersion(version.id)}
-                    >
-                      {history.length > 1 ? '查看差异' : '查看内容'}
-                    </button>
+                    {canCompareFile(editor.doc.extension) && (
+                      <button
+                        className="secondary"
+                        disabled={busy}
+                        onClick={() => setComparedVersion(version.id)}
+                      >
+                        {history.length > 1 ? '查看差异' : '查看内容'}
+                      </button>
+                    )}
                     <button
                       className="secondary"
                       disabled={busy || dirty || index === 0}
@@ -801,6 +837,7 @@ export function App() {
                           )
                           setEditor({
                             doc: result.document,
+                            readOnlyText: result.text,
                             text: result.text ?? '',
                             savedText: result.text ?? '',
                           })
@@ -890,7 +927,7 @@ export function App() {
                     <p>{snapshot.storagePath}</p>
                   </div>
                 </div>
-                <p className="muted">版本 0.8.1 · 测试版</p>
+                <p className="muted">版本 0.9.0 · 测试版</p>
                 <p>原文件不会随导入而移动或删除。文档副本、分类和历史版本保存在上述目录。</p>
                 <StorageActions
                   onBackup={backupLibrary}
@@ -985,7 +1022,7 @@ export function App() {
                     ? '先建一个分类，之后随时可以把文件移进来。'
                     : modal === 'rename'
                       ? '请保留文件原有的扩展名。'
-                      : '新文档将保存在当前分类，没有分类时放入“未分类”。'}
+                      : '新文档将保存在当前分类；未指定分类的文件可在“全部文件”中查看。'}
                 </p>
                 <div className="modal-actions">
                   <button
@@ -1032,7 +1069,7 @@ export function App() {
             const removed = categoryDescendants(snapshot.categories, managedCategory.id)
             await api.deleteCategory(managedCategory.id, destination)
             if (categoryId && removed.has(categoryId))
-              navigate(destination ? `category:${destination}` : 'uncategorized')
+              navigate(destination ? `category:${destination}` : 'all')
             await refresh()
             setManagedCategory(null)
             setNotice('分类已删除，文件和历史版本已保留')
@@ -1053,7 +1090,7 @@ export function App() {
             setSelectionEpoch((value) => value + 1)
             setQuery('')
             setType('all')
-            navigate(destination ? `category:${destination}` : 'uncategorized')
+            navigate(destination ? `category:${destination}` : 'all')
           }}
         />
       )}
