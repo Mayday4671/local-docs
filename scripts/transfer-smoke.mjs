@@ -40,6 +40,7 @@ async function launch() {
   })
   await page.emulateMedia({ colorScheme: null })
   await expect(page.getByRole('heading', { name: '全部文件' })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   return page
 }
 async function chooseOpen(paths) {
@@ -86,6 +87,7 @@ try {
   await chooseOpen([wordPath, sheetPath])
   await page.evaluate((id) => window.localDocs.importFiles(id), seed.design.id)
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await expect(page.getByRole('row', { name: /项目记录.md/ })).toBeVisible()
   const before = await page.evaluate(() => window.localDocs.snapshot())
   const history = await page.evaluate((id) => window.localDocs.versions(id), seed.doc.id)
@@ -112,6 +114,7 @@ try {
     await window.localDocs.setTheme('light')
   }, seed.doc.id)
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.getByRole('button', { name: '设置', exact: true }).click()
   await page.getByRole('button', { name: '选择备份', exact: true }).click()
   await expect(page.getByRole('heading', { name: '确认恢复文档库' })).toBeVisible()

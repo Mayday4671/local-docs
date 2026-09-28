@@ -71,11 +71,13 @@ try {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: paths })
   }, paths)
   await expect(page.getByRole('heading', { name: '全部文件', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.evaluate(async () => {
     await window.localDocs.importFiles(null)
     await window.localDocs.setTheme('dark')
   })
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   const baseline = await page.evaluate(() => window.localDocs.snapshot())
   const browserZoom = await app.evaluate(({ BrowserWindow }) =>
     BrowserWindow.getAllWindows()[0].webContents.getZoomFactor(),

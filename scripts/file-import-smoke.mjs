@@ -58,6 +58,7 @@ try {
     )
   })
   await expect(page.getByRole('heading', { name: '全部文件', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await expect(page.getByRole('button', { name: /^未分类/ })).toHaveCount(0)
   await app.evaluate(
     ({ dialog }, paths) => {
@@ -116,6 +117,7 @@ try {
 
   const category = await page.evaluate(() => window.localDocs.createCategory('拖入目标', null))
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.getByRole('button', { name: /^拖入目标/ }).click()
   const cdp = await page.context().newCDPSession(page)
   const drag = async (names) => {

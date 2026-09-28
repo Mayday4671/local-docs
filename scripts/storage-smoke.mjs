@@ -42,6 +42,7 @@ async function launch(legacy = false, installationPath = installation) {
     )
   })
   await expect(page.getByRole('heading', { name: '全部文件', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   return page
 }
 async function choose(paths) {
@@ -117,6 +118,7 @@ try {
   await choose(imports)
   expect((await page.evaluate(() => window.localDocs.importFiles(null))).failures).toEqual([])
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   const before = await capture(page, doc.id)
   await page.getByRole('button', { name: '设置', exact: true }).click()
   await expect(page.locator('.storage-card')).toContainText(source)

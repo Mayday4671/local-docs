@@ -40,6 +40,7 @@ async function launch() {
   })
   await page.emulateMedia({ colorScheme: null })
   await expect(page.getByRole('heading', { name: '全部文件', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   return page
 }
 async function choose(path) {
@@ -54,6 +55,7 @@ try {
   await page.evaluate(() => window.localDocs.importFiles(null))
   await page.evaluate(() => window.localDocs.setTheme('light'))
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.getByRole('row', { name: /段落测试.docx/ }).dblclick()
   await page
     .locator('.office-edit-toolbar')

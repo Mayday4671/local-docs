@@ -76,7 +76,6 @@ async function actionsFit(page) {
 }
 try {
   let page = await launch()
-  await previewToggle(page, '收起预览')
   await expect(page.locator('.preview-panel')).toHaveCount(0)
   await previewToggle(page, '展开预览')
   await expect(page.getByText('选择文件以预览', { exact: true })).toBeVisible()
@@ -102,6 +101,8 @@ try {
   }, paths)
   await page.evaluate(() => window.localDocs.importFiles(null))
   await page.reload()
+  await expect(page.locator('.preview-panel')).toHaveCount(0)
+  await previewToggle(page, '展开预览')
   await page.getByRole('row', { name: /首页笔记.md/ }).click()
   await page.getByRole('button', { name: '文档选项', exact: true }).click()
   await expect(page.locator('.preview-info .popover')).not.toContainText('收起预览')
@@ -185,6 +186,8 @@ try {
   await app.close()
   app = undefined
   page = await launch()
+  await expect(page.locator('.preview-panel')).toHaveCount(0)
+  await previewToggle(page, '展开预览')
   await expect.poll(async () => (await sizes(page)).ratio).toBeCloseTo(0.53, 2)
   await page.getByRole('row', { name: /首页笔记.md/ }).dblclick()
   await expect(page.getByRole('separator', { name: '调整编辑区与预览区宽度' })).toHaveAttribute(

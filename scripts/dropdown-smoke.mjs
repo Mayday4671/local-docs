@@ -72,6 +72,7 @@ try {
     win.showInactive()
   })
   await expect(page.getByRole('heading', { name: '全部文件', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   expect(await page.evaluate(() => CSS.supports('appearance', 'base-select'))).toBe(true)
   const seed = await page.evaluate(async () => {
     const api = window.localDocs
@@ -89,6 +90,7 @@ try {
   )
   await page.evaluate(() => window.localDocs.importFiles(null))
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
 
   await page.getByRole('button', { name: '新建文件夹', exact: true }).click()
   await pick('上级分类', 'Java')
@@ -110,6 +112,7 @@ try {
     return category
   })
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
 
   // Same dialog as the reported screenshot; mouse, keyboard, long labels and scrolling.
   await page.getByRole('button', { name: '新建文件夹', exact: true }).click()
@@ -183,6 +186,7 @@ try {
   await page.getByRole('button', { name: '取消', exact: true }).click()
   await page.evaluate((id) => window.localDocs.trashDocument(id), seed.doc.id)
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.getByRole('button', { name: /回收站/ }).click()
   await page.getByRole('row', { name: /下拉框检查.md/ }).click()
   await page.getByRole('tab', { name: '信息', exact: true }).click()

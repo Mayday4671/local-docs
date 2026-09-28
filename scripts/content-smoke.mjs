@@ -39,6 +39,7 @@ async function launch() {
   })
   await page.emulateMedia({ colorScheme: null })
   await expect(page.getByRole('heading', { name: '全部文件', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   return page
 }
 async function choose(path) {
@@ -82,6 +83,7 @@ try {
   await choose(join(root, '单元格测试.xlsx'))
   await page.evaluate(() => window.localDocs.importFiles(null))
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.getByRole('button', { name: '收藏 阅读笔记.md', exact: true }).click()
   await page.getByRole('button', { name: /^收藏 1$/ }).click()
   await expect(page.locator('.file-table tbody tr')).toHaveCount(1)
@@ -151,7 +153,10 @@ try {
   ).toBeVisible()
   await page.getByRole('button', { name: '返回列表', exact: true }).click()
   await page.getByRole('row', { name: /单元格测试.xlsx/ }).dblclick()
-  await page.getByRole('button', { name: 'A2 核心交换机', exact: true }).click()
+  await page
+    .locator('.editor-page')
+    .getByRole('button', { name: 'A2 核心交换机', exact: true })
+    .click()
   await page.getByRole('button', { name: '标记所选内容', exact: true }).click()
   await page.getByLabel('标记备注', { exact: true }).fill('Excel 标记')
   await page.getByRole('button', { name: '保存标记', exact: true }).click()
@@ -167,7 +172,9 @@ try {
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1000, 650))
   await page.screenshot({ path: join(results, 'content-excel-compact-dark.png') })
   await page.getByRole('button', { name: '阅读与标记', exact: true }).click()
-  await expect(page.getByRole('button', { name: 'A2 已编辑的交换机', exact: true })).toBeVisible()
+  await expect(
+    page.locator('.editor-page').getByRole('button', { name: 'A2 已编辑的交换机', exact: true }),
+  ).toBeVisible()
   await page.getByRole('button', { name: '返回列表', exact: true }).click()
   expect(await readFile(join(root, '段落测试.docx'))).toEqual(word)
   expect(await readFile(join(root, '单元格测试.xlsx'))).toEqual(sheet)

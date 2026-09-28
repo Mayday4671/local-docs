@@ -1217,7 +1217,7 @@ export function LibraryWorkspace(p: Props) {
                   <div className="preview-empty">
                     <BookOpen size={45} strokeWidth={1.2} />
                     <h3>选择文件以预览</h3>
-                    <p>单击查看内容，双击打开文档。</p>
+                    <p>预览展开时单击查看内容，双击打开文档。</p>
                   </div>
                 </>
               )}

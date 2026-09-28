@@ -70,7 +70,7 @@ export function App() {
   const [type, setType] = useState('all')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [preview, setPreview] = useState<DocumentContent | null>(null)
-  const [previewOpen, setPreviewOpen] = useState(true)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [transferring, setTransferring] = useState(false)
   const [transferProgress, setTransferProgress] = useState<OperationStatus | null>(null)
@@ -232,7 +232,7 @@ export function App() {
   useEffect(() => {
     let cancelled = false
     setPreview((current) => (current?.document.id === selectedId ? current : null))
-    if (selectedId && snapshot.documents.some((doc) => doc.id === selectedId))
+    if (previewOpen && selectedId && snapshot.documents.some((doc) => doc.id === selectedId))
       void api
         ?.readDocument(selectedId)
         .then((value) => {
@@ -245,7 +245,7 @@ export function App() {
     return () => {
       cancelled = true
     }
-  }, [selectedId, snapshot])
+  }, [previewOpen, selectedId, snapshot])
 
   useEffect(() => {
     const listener = (event: BeforeUnloadEvent) => {
@@ -459,7 +459,6 @@ export function App() {
         setBatchOnly(false)
         setBatch(result.imported)
         setSelectedId(result.imported[0])
-        setPreviewOpen(true)
       }
       if (result.failures.length)
         setError(result.failures.map((item) => `${item.name}：${item.reason}`).join('\n'))
@@ -480,7 +479,6 @@ export function App() {
           ? await api!.createOffice(name, newExtension, categoryId)
           : await api!.createMarkdown(name, categoryId)
         setSelectedId(doc.id)
-        setPreviewOpen(true)
         const content = await api!.openDocument(doc.id)
         setEditor({ doc: content.document, text: '', savedText: '', initialMode: 'edit' })
         setRecovery(null)
@@ -560,11 +558,8 @@ export function App() {
           onNavigate={navigate}
           onQuery={setQuery}
           onType={setType}
-          onSelect={(id) => {
-            setSelectedId(id)
-            setPreviewOpen(true)
-          }}
-          onPreviewToggle={() => setPreviewOpen(!previewOpen)}
+          onSelect={setSelectedId}
+          onPreviewToggle={() => setPreviewOpen((open) => !open)}
           onImport={() => importFiles()}
           onImportFolder={() =>
             void transfer(async () => {
@@ -993,7 +988,7 @@ export function App() {
                     {storageInfo.notice}
                   </p>
                 )}
-                <p className="muted">版本 0.10.5 · 测试版</p>
+                <p className="muted">版本 0.10.6 · 测试版</p>
                 <p>原文件不会随导入而移动或删除。文档副本、分类和历史版本保存在上述目录。</p>
                 <StorageActions
                   onBackup={backupLibrary}
@@ -1214,7 +1209,6 @@ export function App() {
             setType('all')
             setBatchOnly(true)
             setSelectedId(folderResult.imported[0] || null)
-            setPreviewOpen(true)
             setSelectionEpoch((value) => value + 1)
             setFolderResult(null)
           }}

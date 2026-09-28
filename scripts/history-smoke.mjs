@@ -41,6 +41,7 @@ try {
   })
   await page.emulateMedia({ colorScheme: null })
   await expect(page.getByRole('heading', { name: '全部文件', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.evaluate(() => window.localDocs.setTheme('light'))
   await app.evaluate(
     ({ dialog }, paths) => {
@@ -65,6 +66,7 @@ try {
     return second
   })
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   const edit = async (name) => {
     await page.getByRole('row', { name: new RegExp(name) }).click()
     await page.getByRole('button', { name: '编辑', exact: true }).click()
@@ -144,6 +146,7 @@ try {
     )
   })
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await edit('分页对比.md')
   dialog = await showHistory()
   await expect(dialog.getByRole('status')).toHaveText('新增 0 · 删除 0 · 修改 205')

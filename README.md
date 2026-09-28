@@ -6,17 +6,17 @@
 
 ## Windows 安装使用
 
-**[下载 0.10.5 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.5/local-docs-0.10.5-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.5)
+**[下载 0.10.6 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.6/local-docs-0.10.6-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.6)
 
 适用于 Windows 10 / 11 x64。下载 EXE 后双击进入中文安装向导，安装后从开始菜单打开“我的文档库”。安装和日常使用无需联网，也无需另外安装 Node.js、npm、数据库服务、Office 或 WebView2；离线电脑可通过 U 盘携带安装包。普通使用不需要下载 GitHub 自动生成的 Source code。
 
-本地构建产物位于 `release/0.10.5/local-docs-0.10.5-x64-setup.exe`。安装文件夹名为英文 `local-docs`；通过“浏览”选择 `D:\Soft` 后，路径框自动显示 `D:\Soft\local-docs`。发布包不包含用户资料库或个人文档，新电脑首次运行在安装目录的 `data/library` 下创建空文档库；换机请通过应用的“完整备份 → 恢复”迁移资料。
+本地构建产物位于 `release/0.10.6/local-docs-0.10.6-x64-setup.exe`。安装文件夹名为英文 `local-docs`；通过“浏览”选择 `D:\Soft` 后，路径框自动显示 `D:\Soft\local-docs`。发布包不包含用户资料库或个人文档，新电脑首次运行在安装目录的 `data/library` 下创建空文档库；换机请通过应用的“完整备份 → 恢复”迁移资料。
 
-这是 **0.10.5 测试版 EXE**。列表和网格文件支持右键菜单：打开、编辑、重命名、收藏、移动分类、导出、复制路径与移入回收站。勾选多份文件可批量操作；回收站可恢复或确认后彻底删除，保留其他文件仍在使用的共享内容、导入源文件和旧备份。文档库默认放在安装目录下，“设置 → 文档库位置 → 修改位置”可迁移到其他磁盘，复制校验后立即切换并保留旧副本。旧版资料自动迁入默认位置，失败时继续使用旧库。PDF、TXT、SQL、图片收纳与阅读、文件拖入等已有功能保留。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，附有 SHA-256 校验文件。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
+这是 **0.10.6 测试版 EXE**。首页预览默认隐藏，只通过列表右上角的“展开预览”按钮显示。单击、右击、导入、新建后返回列表都保留当前开关状态，右键菜单不再自动展开预览。已展开时切换文件正常更新，隐藏时不读取预览正文；分栏宽度继续记忆。文档库默认放在安装目录下，“设置 → 文档库位置 → 修改位置”可迁移到其他磁盘，复制校验后立即切换并保留旧副本。旧版资料自动迁入默认位置，失败时继续使用旧库。PDF、TXT、SQL、图片收纳与阅读、文件拖入等已有功能保留。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，附有 SHA-256 校验文件。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
 
 ## 当前阶段
 
-**0.10.5 开发测试版，尚未完成 V1.1 验收。**
+**0.10.6 开发测试版，尚未完成 V1.1 验收。**
 
 已有可运行流程：
 
@@ -39,6 +39,7 @@
 - 搜索结果显示命中摘要；打开结果可进入 Word 正文中的命中段落，或 Excel 的真实工作表及单元格。
 - 新建和编辑 Markdown，手动保存 / Ctrl+S 保存，实时阅读预览。
 - 拖动 Markdown 编辑页中间分隔条调整两栏宽度，重启后记住比例；双击或 Enter 恢复均分，左右方向键微调。窄窗口和历史面板打开时自动保护最小可用宽度。
+- 首页预览每次启动默认隐藏，点击列表右上角“展开预览”显示；单击、右击及导入不自动展开，已展开时选择文件更新内容。
 - 首页拖动文件列表与文档预览之间的分隔条，双击或 Enter 恢复默认比例；收起 / 展开预览和重启后记住宽度，与编辑页独立。列表变窄时优先展示文件名，预览按钮随宽度换行，左侧分类栏保持原宽度。
 - 列表星标、阅读页收藏、批量收藏和取消收藏。
 - Markdown / Word 正文选字、Excel 单元格标记；四色高亮、备注、修改与删除，侧栏“内容标记”集中查看，点击返回原位置。标记与备注可搜索，独立于正文保存。
@@ -98,7 +99,7 @@ npm run test:zoom       # PDF / Word 滚轮缩放、比例菜单、草稿及原�
 npm run test:dropdown   # 下拉框展开、键盘、弹窗层级、长选项、主题与窄窗口
 npm run test:storage    # 安装目录默认存储、路径迁移、重启与旧版资料迁移
 npm run test:installer-storage # 隔离验证 NSIS 清理钩子保留资料，需先打包以缓存 NSIS 工具
-npm run test:packaged   # 验证当前版本 release/0.10.5/win-unpacked 中的独立 EXE，需先打包
+npm run test:packaged   # 验证当前版本 release/0.10.6/win-unpacked 中的独立 EXE，需先打包
 npm run start           # 打开已构建的桌面应用
 npm run package:win     # 生成 Windows NSIS 安装包，输出到 release/
 ```

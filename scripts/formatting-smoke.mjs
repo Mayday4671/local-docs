@@ -48,6 +48,7 @@ async function launch() {
     )
   })
   await expect(page.getByRole('heading', { name: '全部文件' })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   return page
 }
 async function setTheme(page, theme, label) {

@@ -47,6 +47,7 @@ async function launch() {
   })
   await page.emulateMedia({ colorScheme: null })
   await expect(page.getByRole('heading', { name: '全部文件' })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   return page
 }
 async function chooseFolder(page, folder = source) {
@@ -80,6 +81,7 @@ try {
   const original = await page.evaluate((id) => window.localDocs.readDocument(id), seed.first.id)
   const versions = await page.evaluate((id) => window.localDocs.versions(id), seed.first.id)
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.getByRole('button', { name: '管理分类 待整理', exact: true }).click()
   await expect(page.getByLabel('移动到上级分类').locator('option')).toHaveCount(2)
   await page.getByLabel('分类名称', { exact: true }).fill('项目归档')

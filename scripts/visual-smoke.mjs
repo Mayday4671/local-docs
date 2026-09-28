@@ -57,6 +57,7 @@ try {
     win.showInactive()
   })
   await expect(page.getByRole('heading', { name: '全部文件' })).toBeVisible()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   const designId = await page.evaluate(async () => {
     const api = window.localDocs
     const work = await api.createCategory('工作')
@@ -73,6 +74,7 @@ try {
     return design.id
   })
   await page.reload()
+  await page.getByRole('button', { name: '展开预览', exact: true }).click()
   await page.getByRole('button', { name: '设计', exact: true }).click()
   await app.evaluate(
     ({ dialog }, paths) => {
