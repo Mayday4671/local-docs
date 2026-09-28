@@ -6,17 +6,17 @@
 
 ## Windows 安装使用
 
-**[下载 0.10.0 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.0/local-docs-0.10.0-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.0)
+**[下载 0.10.1 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.1/local-docs-0.10.1-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.1)
 
 适用于 Windows 10 / 11 x64。下载 EXE 后双击进入中文安装向导，安装后从开始菜单打开“我的文档库”。安装和日常使用无需联网，也无需另外安装 Node.js、npm、数据库服务、Office 或 WebView2；离线电脑可通过 U 盘携带安装包。普通使用不需要下载 GitHub 自动生成的 Source code。
 
-本地构建产物位于 `release/0.10.0/local-docs-0.10.0-x64-setup.exe`。发布包不包含用户资料库或个人文档，新电脑首次运行在安装目录的 `data/library` 下创建空文档库；换机请通过应用的“完整备份 → 恢复”迁移资料。
+本地构建产物位于 `release/0.10.1/local-docs-0.10.1-x64-setup.exe`。安装文件夹名为英文 `local-docs`；通过“浏览”选择 `D:\Soft` 后，路径框自动显示 `D:\Soft\local-docs`。发布包不包含用户资料库或个人文档，新电脑首次运行在安装目录的 `data/library` 下创建空文档库；换机请通过应用的“完整备份 → 恢复”迁移资料。
 
-这是 **0.10.0 测试版 EXE**。文档库默认放在安装目录下，“设置 → 文档库位置 → 修改位置”可迁移到其他磁盘，复制校验后立即切换并保留旧副本。旧版资料自动迁入默认位置，失败时继续使用旧库。PDF、TXT、SQL、图片收纳与阅读、文件拖入等已有功能保留。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，附有 SHA-256 校验文件。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
+这是 **0.10.1 测试版 EXE**。修复安装向导“浏览”后没有显示应用子目录的问题。文档库默认放在安装目录下，“设置 → 文档库位置 → 修改位置”可迁移到其他磁盘，复制校验后立即切换并保留旧副本。旧版资料自动迁入默认位置，失败时继续使用旧库。PDF、TXT、SQL、图片收纳与阅读、文件拖入等已有功能保留。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，附有 SHA-256 校验文件。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
 
 ## 当前阶段
 
-**0.10.0 开发测试版，尚未完成 V1.1 验收。**
+**0.10.1 开发测试版，尚未完成 V1.1 验收。**
 
 已有可运行流程：
 
@@ -94,7 +94,7 @@ npm run test:history    # 历史差异、草稿保护、分页、直接编辑与
 npm run test:files      # 多类型文件、原生文件拖入、离线中文 PDF 与原件保护
 npm run test:storage    # 安装目录默认存储、路径迁移、重启与旧版资料迁移
 npm run test:installer-storage # 隔离验证 NSIS 清理钩子保留资料，需先打包以缓存 NSIS 工具
-npm run test:packaged   # 验证当前版本 release/0.10.0/win-unpacked 中的独立 EXE，需先打包
+npm run test:packaged   # 验证当前版本 release/0.10.1/win-unpacked 中的独立 EXE，需先打包
 npm run start           # 打开已构建的桌面应用
 npm run package:win     # 生成 Windows NSIS 安装包，输出到 release/
 ```

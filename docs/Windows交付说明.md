@@ -1,12 +1,12 @@
 # Windows 交付说明
 
-日期：2026-09-28。当前版本：0.10.0 开发测试版。
+日期：2026-09-28。当前版本：0.10.1 开发测试版。
 
 ## 安装包
 
-`release/0.10.0/local-docs-0.10.0-x64-setup.exe`，116,467,591 字节（约 111 MiB）。
+`release/0.10.1/local-docs-0.10.1-x64-setup.exe`，116,466,772 字节（约 111 MiB）。
 
-在线下载：[EXE 安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.0/local-docs-0.10.0-x64-setup.exe) · [发布说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.0) · [SHA256SUMS.txt](https://github.com/Mayday4671/local-docs/releases/download/v0.10.0/SHA256SUMS.txt)。以测试版发布。
+在线下载：[EXE 安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.1/local-docs-0.10.1-x64-setup.exe) · [发布说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.1) · [SHA256SUMS.txt](https://github.com/Mayday4671/local-docs/releases/download/v0.10.1/SHA256SUMS.txt)。以测试版发布。
 
 保存并关闭旧版窗口后，双击 EXE，按照中文向导安装。应用包含运行环境、界面、数据库引擎和本地文档解析，不需要另装 Node.js、npm、Office、WebView2 或服务器。安装与日常使用无需联网，可用 U 盘携带安装包。安装包尚未数字签名。
 
@@ -17,6 +17,8 @@
 地址配置和浏览器缓存仍在 `%APPDATA%/local-docs/`，其中 `storage-location.json` 只保存文档库路径。本次不改变 schema v5 或备份 v2；含 0.9.0 新增文件类型的备份应使用 0.9.0 或更新版本恢复。跨电脑继续使用完整备份 / 恢复。
 
 ## 本次修正
+
+0.10.1 为安装向导设置原生的 `InstallDir`，浏览文件夹时立即补上英文子目录 `local-docs`。例如选择 `D:\Soft` 后，路径框显示 `D:\Soft\local-docs`；默认资料位于 `D:\Soft\local-docs\data\library`。直接选中已有的 local-docs 文件夹不会重复追加。升级保留已登记的安装位置。
 
 0.10.0 新增安装目录默认存储和设置内位置迁移。迁移包含所有仍被引用的文件 / 历史 / 附件对象及完整数据库记录，逐项校验后切换；取消、损坏、目标非空、地址写入失败均保留原库。新产生的恢复前备份随当前库保存，已有历史备份留在旧目录。安装包改为只清理已知程序文件，避免递归删除整个安装目录。详见 [0.10.0 存储位置验收](0.10.0存储位置验收.md)。
 
@@ -43,6 +45,13 @@
 Markdown 侧栏和编辑页支持表格、任务列表、删除线及代码缩进；Excel 侧栏改用真实工作表网格，并按数字格式显示日期、百分比、千分位和补零编号。修复 Office 编码换行和 Word 宽表访问问题。
 
 0.3.1 将主题入口从设置弹窗移至主界面和阅读 / 编辑页右上角。点击主题按钮即可选择浅色、深色、跟随系统，立即生效并自动记忆；键盘方向键、Esc 与点击菜单外关闭可用。切换不会重新读取文档，未保存的编辑内容保持不变。
+
+## 0.10.1 验收结果
+
+- 类型检查、格式检查、生产构建与中文 NSIS 打包通过。
+- 用生产同一份安装头编译无安装载荷、无注册表修改的目录页测试向导，通过 Computer Use 验证默认英文目录、浏览父目录后自动追加和选已有应用目录不重复追加。脚本：`scripts/installer-directory-preview.mjs`。
+- 新包内 EXE 的存储回归通过，覆盖默认路径、设置迁移、重启和旧库迁移；NSIS 清理钩子仍保留 data 与其他用户文件。本轮只改安装头与版本显示，未重复运行 0.10.0 的其余桌面套件。
+- 安装包无个人资料库，未签名；没有覆盖安装用户当前程序。
 
 ## 0.10.0 验收结果
 
@@ -131,7 +140,9 @@ Markdown 侧栏和编辑页支持表格、任务列表、删除线及代码缩�
 
 开发者使用 `npm run package:win` 生成安装包，输出按版本分目录。`npm run test:packaged` 验证当前版本包内 EXE；可附加实际安装 EXE 的路径验证已安装程序。普通使用不需要这些命令。
 
-0.10.0 安装包 SHA-256：`640502e343138cff4a335c34965f58d53598c9c1773462f8f0e8154109329e07`。
+0.10.1 安装包 SHA-256：`88fac79a18efc1fd11cf6ff566532daf7dccab8ca99421092934254287f829ad`。
+
+0.10.0 安装包 SHA-256（历史）：`640502e343138cff4a335c34965f58d53598c9c1773462f8f0e8154109329e07`。
 
 0.9.0 安装包 SHA-256（历史）：`bb7eb3b51e6a7a87581b39788c10827a6c2a94ba9ab664a49f4afbbfc31559c1`。
 

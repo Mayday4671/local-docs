@@ -1,3 +1,9 @@
+; NSIS uses the final component of InstallDir for its native Browse dialog.
+; Setting $INSTDIR at runtime alone does not configure that browse suffix.
+!macro customHeader
+  InstallDir "$LOCALAPPDATA\Programs\local-docs"
+!macroend
+
 ; Delete only the known application payload. Never recursively remove $INSTDIR:
 ; the default library lives in $INSTDIR\data and must survive upgrade/uninstall.
 !macro customRemoveFiles
