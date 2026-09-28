@@ -6,6 +6,7 @@ import type {
   FolderImportPreview,
   FolderImportResult,
   LibrarySnapshot,
+  DocumentRecord,
 } from '../../shared/types'
 import { categoryPath, fileSize } from './LibraryWorkspace'
 
@@ -135,6 +136,38 @@ function Dialog({
         {children}
       </section>
     </div>
+  )
+}
+
+export function PurgeDialog({
+  documents,
+  busy,
+  onClose,
+  onConfirm,
+}: {
+  documents: DocumentRecord[]
+  busy: boolean
+  onClose: () => void
+  onConfirm: () => void
+}) {
+  return (
+    <Dialog title="彻底删除文件" busy={busy} onClose={onClose}>
+      <p>即将彻底删除以下 {documents.length} 份文件，以及它们的历史版本、标记和草稿。</p>
+      <ul className="purge-file-list">
+        {documents.map((doc) => (
+          <li key={doc.id}>{doc.name}</li>
+        ))}
+      </ul>
+      <p className="restore-warning">删除后无法从回收站恢复。导入源文件和已导出的备份不受影响。</p>
+      <div className="modal-actions">
+        <button className="secondary" disabled={busy} onClick={onClose}>
+          取消
+        </button>
+        <button className="danger" disabled={busy} onClick={onConfirm}>
+          {busy ? '正在删除…' : '确认彻底删除'}
+        </button>
+      </div>
+    </Dialog>
   )
 }
 function useAction() {

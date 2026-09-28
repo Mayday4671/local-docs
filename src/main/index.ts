@@ -331,6 +331,7 @@ function registerApi(
     updateDocument: async (id, patch) => store.updateDocument(id, patch),
     trashDocument: async (id) => store.trashDocument(id),
     restoreDocument: async (id) => store.restoreDocument(id),
+    purgeDocuments: async (ids) => store.purgeDocuments(ids),
     exportDocument: async (id) => {
       const document = store.readDocument(id).document
       const choice = await dialog.showSaveDialog(window!, {

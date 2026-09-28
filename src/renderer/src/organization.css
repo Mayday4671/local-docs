@@ -7,6 +7,17 @@
   overflow-y: auto;
   outline: none;
 }
+.purge-file-list {
+  max-height: 180px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  padding: 12px 12px 12px 30px;
+  background: var(--surface-muted);
+  border-radius: 6px;
+}
+.purge-file-list li + li {
+  margin-top: 8px;
+}
 .organization-dialog fieldset {
   padding: 0;
   border: 0;

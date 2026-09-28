@@ -8,6 +8,7 @@ import {
   MoveDialog,
   FolderPreviewDialog,
   FolderResultDialog,
+  PurgeDialog,
   categoryDescendants,
 } from './OrganizationDialogs'
 import { canEditFile, canCompareFile, fileKind, fileTypeName } from '../../shared/file-types'
@@ -77,6 +78,7 @@ export function App() {
   const [transferResult, setTransferResult] = useState<TransferResult | null>(null)
   const [managedCategory, setManagedCategory] = useState<Category | null>(null)
   const [moveIds, setMoveIds] = useState<string[] | null>(null)
+  const [purgeDocs, setPurgeDocs] = useState<DocumentRecord[] | null>(null)
   const [selectionEpoch, setSelectionEpoch] = useState(0)
   const [folderPreview, setFolderPreview] = useState<FolderImportPreview | null>(null)
   const [folderResult, setFolderResult] = useState<FolderImportResult | null>(null)
@@ -85,6 +87,7 @@ export function App() {
   const organizing = !!(
     managedCategory ||
     moveIds ||
+    purgeDocs ||
     folderPreview ||
     folderResult ||
     storagePreview
@@ -229,7 +232,7 @@ export function App() {
   useEffect(() => {
     let cancelled = false
     setPreview((current) => (current?.document.id === selectedId ? current : null))
-    if (selectedId)
+    if (selectedId && snapshot.documents.some((doc) => doc.id === selectedId))
       void api
         ?.readDocument(selectedId)
         .then((value) => {
@@ -238,6 +241,7 @@ export function App() {
         .catch((error) => {
           if (!cancelled) setError(String(error))
         })
+    else setPreview(null)
     return () => {
       cancelled = true
     }
@@ -570,6 +574,7 @@ export function App() {
           }
           onManageCategory={setManagedCategory}
           onMoveDocuments={setMoveIds}
+          onPurgeDocuments={setPurgeDocs}
           selectionEpoch={selectionEpoch}
           onCreateDocument={() => {
             setNewExtension(null)
@@ -585,7 +590,11 @@ export function App() {
           }}
           onSettings={() => setModal('settings')}
           onOpen={open}
-          onRename={() => showNameModal('rename')}
+          onRename={(doc) => {
+            setSelectedId(doc.id)
+            setName(doc.name)
+            setModal('rename')
+          }}
           onExport={exportDoc}
           onExportLibrary={exportLibrary}
           onBatch={() => {
@@ -603,6 +612,26 @@ export function App() {
           themeControl={themeControl}
         />
       </div>
+      {purgeDocs && (
+        <PurgeDialog
+          documents={purgeDocs}
+          busy={busy}
+          onClose={() => setPurgeDocs(null)}
+          onConfirm={() =>
+            void perform(async () => {
+              const result = await api.purgeDocuments(purgeDocs.map((doc) => doc.id))
+              if (purgeDocs.some((doc) => doc.id === selectedId)) setSelectedId(null)
+              setPurgeDocs(null)
+              setSelectionEpoch((value) => value + 1)
+              setNotice(`已彻底删除 ${result.deleted} 份文件`)
+              if (result.pendingCleanup)
+                setError(
+                  `文件记录已删除，但有 ${result.pendingCleanup} 个库内内容文件未能清理，可能正在被其他程序占用。`,
+                )
+            })
+          }
+        />
+      )}
       {editor && (
         <div
           className="editor-page"
@@ -964,7 +993,7 @@ export function App() {
                     {storageInfo.notice}
                   </p>
                 )}
-                <p className="muted">版本 0.10.4 · 测试版</p>
+                <p className="muted">版本 0.10.5 · 测试版</p>
                 <p>原文件不会随导入而移动或删除。文档副本、分类和历史版本保存在上述目录。</p>
                 <StorageActions
                   onBackup={backupLibrary}

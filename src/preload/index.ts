@@ -54,6 +54,7 @@ const api: Omit<LibraryApi, 'importDroppedFiles'> = {
   updateDocument: (id, patch) => ipcRenderer.invoke(IPC.updateDocument, id, patch),
   trashDocument: (id) => ipcRenderer.invoke(IPC.trashDocument, id),
   restoreDocument: (id) => ipcRenderer.invoke(IPC.restoreDocument, id),
+  purgeDocuments: (ids) => ipcRenderer.invoke(IPC.purgeDocuments, ids),
   exportDocument: (id) => ipcRenderer.invoke(IPC.exportDocument, id),
   versions: (id) => ipcRenderer.invoke(IPC.versions, id),
   readVersion: (id, versionId) => ipcRenderer.invoke(IPC.readVersion, id, versionId),

@@ -9,6 +9,7 @@ import {
   mkdirSync,
   openSync,
   readFileSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path'
@@ -921,6 +922,51 @@ export class Library {
   restoreDocument(id: string): void {
     this.row(id)
     this.db.prepare('UPDATE documents SET deleted_at = NULL WHERE id = ?').run(id)
+  }
+
+  /** Only trash can be purged. Commit metadata first, then remove exclusively owned objects. */
+  purgeDocuments(ids: string[]): { deleted: number; pendingCleanup: number } {
+    if (!Array.isArray(ids) || !ids.length || ids.length > 10000)
+      throw new Error('请选择 1–10000 份回收站文件。')
+    const unique = new Set(ids.map(idOf))
+    const paths = this.transaction(() => {
+      for (const id of unique)
+        if (!this.row(id).deleted_at) throw new Error('只能彻底删除回收站中的文件。')
+      const candidates = new Set<string>(),
+        retained = new Set<string>()
+      const remember = (id: string, hash: string) =>
+        (unique.has(id) ? candidates : retained).add(hash)
+      for (const row of this.db.prepare('SELECT id, blob_hash FROM documents').all())
+        remember(String(row.id), String(row.blob_hash))
+      for (const row of this.db.prepare('SELECT document_id, blob_hash FROM versions').all())
+        remember(String(row.document_id), String(row.blob_hash))
+      for (const row of this.db.prepare('SELECT document_id, data FROM document_state').all()) {
+        const id = String(row.document_id)
+        for (const attachment of validateState(JSON.parse(String(row.data)), id).attachments)
+          remember(id, attachment.hash)
+      }
+      // Validate paths before committing. Shared contents, history and attachments remain intact.
+      const orphanPaths = [...candidates]
+        .filter((hash) => !retained.has(hash))
+        .map((hash) => this.objectPath(hash))
+      const versions = this.db.prepare('DELETE FROM versions WHERE document_id = ?')
+      const documents = this.db.prepare('DELETE FROM documents WHERE id = ?')
+      for (const id of unique) {
+        versions.run(id)
+        documents.run(id) // office_cache and document_state are removed by foreign keys.
+      }
+      return orphanPaths
+    })
+    let pendingCleanup = 0
+    for (const path of paths) {
+      try {
+        unlinkSync(path)
+      } catch (error) {
+        // A locked object must not roll back metadata that now refers to already removed bytes.
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') pendingCleanup++
+      }
+    }
+    return { deleted: unique.size, pendingCleanup }
   }
 
   exportDocument(id: string, destination: string): void {

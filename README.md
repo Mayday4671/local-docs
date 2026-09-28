@@ -6,17 +6,17 @@
 
 ## Windows 安装使用
 
-**[下载 0.10.4 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.4/local-docs-0.10.4-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.4)
+**[下载 0.10.5 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.5/local-docs-0.10.5-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.5)
 
 适用于 Windows 10 / 11 x64。下载 EXE 后双击进入中文安装向导，安装后从开始菜单打开“我的文档库”。安装和日常使用无需联网，也无需另外安装 Node.js、npm、数据库服务、Office 或 WebView2；离线电脑可通过 U 盘携带安装包。普通使用不需要下载 GitHub 自动生成的 Source code。
 
-本地构建产物位于 `release/0.10.4/local-docs-0.10.4-x64-setup.exe`。安装文件夹名为英文 `local-docs`；通过“浏览”选择 `D:\Soft` 后，路径框自动显示 `D:\Soft\local-docs`。发布包不包含用户资料库或个人文档，新电脑首次运行在安装目录的 `data/library` 下创建空文档库；换机请通过应用的“完整备份 → 恢复”迁移资料。
+本地构建产物位于 `release/0.10.5/local-docs-0.10.5-x64-setup.exe`。安装文件夹名为英文 `local-docs`；通过“浏览”选择 `D:\Soft` 后，路径框自动显示 `D:\Soft\local-docs`。发布包不包含用户资料库或个人文档，新电脑首次运行在安装目录的 `data/library` 下创建空文档库；换机请通过应用的“完整备份 → 恢复”迁移资料。
 
-这是 **0.10.4 测试版 EXE**。PDF 首页预览 / 独立阅读与 Word 编辑支持 Ctrl＋滚轮缩放（50%～300%），比例同步更新，普通滚轮继续滚动。修复缩放下拉菜单的百分比换行，以及 PDF 渲染提示导致页面反复刷新的问题。文档库默认放在安装目录下，“设置 → 文档库位置 → 修改位置”可迁移到其他磁盘，复制校验后立即切换并保留旧副本。旧版资料自动迁入默认位置，失败时继续使用旧库。PDF、TXT、SQL、图片收纳与阅读、文件拖入等已有功能保留。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，附有 SHA-256 校验文件。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
+这是 **0.10.5 测试版 EXE**。列表和网格文件支持右键菜单：打开、编辑、重命名、收藏、移动分类、导出、复制路径与移入回收站。勾选多份文件可批量操作；回收站可恢复或确认后彻底删除，保留其他文件仍在使用的共享内容、导入源文件和旧备份。文档库默认放在安装目录下，“设置 → 文档库位置 → 修改位置”可迁移到其他磁盘，复制校验后立即切换并保留旧副本。旧版资料自动迁入默认位置，失败时继续使用旧库。PDF、TXT、SQL、图片收纳与阅读、文件拖入等已有功能保留。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，附有 SHA-256 校验文件。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
 
 ## 当前阶段
 
-**0.10.4 开发测试版，尚未完成 V1.1 验收。**
+**0.10.5 开发测试版，尚未完成 V1.1 验收。**
 
 已有可运行流程：
 
@@ -24,6 +24,7 @@
 - 浅色、深色、跟随系统三种主题；通过主界面和阅读 / 编辑页右上角的主题按钮切换并自动记忆。
 - Markdown 表格、任务列表、删除线和代码块；侧栏与编辑页使用同一套渲染。
 - Excel 侧栏直接显示单元格网格，支持日期、百分比、千分位和自定义补零格式。
+- 文件右键菜单支持列表 / 网格、单选 / 多选；Shift+F10 或菜单键可展开，方向键选择、Esc 关闭。网格新增勾选框。回收站支持批量恢复与确认后彻底删除（含该文档历史、标记、草稿与独占附件）。
 - 多级分类、新建子文件夹、列表 / 网格切换、多选移入回收站；预览 / 信息 / 标签页。
 - 分类旁“⋮”可改名、移动和删除；删除分类时转移文件，保留回收站状态和历史。多选文件可批量移动。
 - 列表“⋮ → 导入文件夹”：先预览再导入，保留目录与空分类，可取消；相同内容默认跳过，重名不同内容自动编号，失败项目逐项列出。
@@ -92,11 +93,12 @@ npm run test:editor-split # 两栏拖动、重置、窄窗口、草稿保护与�
 npm run test:library-split # 首页调宽、预览收起展开、三种文件预览与独立记忆
 npm run test:history    # 历史差异、草稿保护、分页、直接编辑与只读错误验证
 npm run test:files      # 多类型文件、原生文件拖入、离线中文 PDF 与原件保护
+npm run test:context-menu # 文件右键、批量操作、恢复及彻底删除确认与原件保护
 npm run test:zoom       # PDF / Word 滚轮缩放、比例菜单、草稿及原件保护
 npm run test:dropdown   # 下拉框展开、键盘、弹窗层级、长选项、主题与窄窗口
 npm run test:storage    # 安装目录默认存储、路径迁移、重启与旧版资料迁移
 npm run test:installer-storage # 隔离验证 NSIS 清理钩子保留资料，需先打包以缓存 NSIS 工具
-npm run test:packaged   # 验证当前版本 release/0.10.4/win-unpacked 中的独立 EXE，需先打包
+npm run test:packaged   # 验证当前版本 release/0.10.5/win-unpacked 中的独立 EXE，需先打包
 npm run start           # 打开已构建的桌面应用
 npm run package:win     # 生成 Windows NSIS 安装包，输出到 release/
 ```

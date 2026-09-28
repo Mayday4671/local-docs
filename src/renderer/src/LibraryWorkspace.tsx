@@ -1,5 +1,12 @@
 import { Select } from './Select'
-import { useEffect, useState, type ReactNode, type RefObject } from 'react'
+import {
+  useEffect,
+  useState,
+  type ReactNode,
+  type RefObject,
+  type MouseEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react'
 import {
   BookOpen,
   Check,
@@ -43,6 +50,7 @@ import { fileKind, canEditFile, fileTypeName } from '../../shared/file-types'
 import { Highlight, locationLabel } from './OfficeReader'
 import { ReadingPane } from './ReadingPane'
 import { ResizableSplit } from './ResizableSplit'
+import { FileContextMenu, type FileMenuAnchor, type FileMenuItem } from './FileContextMenu'
 
 type Patch = Parameters<LibraryApi['updateDocument']>[1]
 export const fileType = (doc: DocumentRecord) => fileTypeName(doc.extension)
@@ -114,13 +122,14 @@ interface Props {
   onImportFolder: () => void
   onManageCategory: (category: Category) => void
   onMoveDocuments: (ids: string[]) => void
+  onPurgeDocuments: (docs: DocumentRecord[]) => void
   selectionEpoch: number
   onCreateDocument: () => void
   onCreateOffice: (extension: '.docx' | '.xlsx') => void
   onCreateCategory: (parentId: string | null) => void
   onSettings: () => void
   onOpen: (doc: DocumentRecord, mode?: 'read' | 'edit') => void
-  onRename: () => void
+  onRename: (doc: DocumentRecord) => void
   onExport: (doc: DocumentRecord) => void
   onExportLibrary: (scope: ExportScope) => void
   onBatch: () => void
@@ -195,6 +204,7 @@ export function LibraryWorkspace(p: Props) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [checked, setChecked] = useState<Set<string>>(new Set())
   const [menu, setMenu] = useState<'files' | 'document' | null>(null)
+  const [context, setContext] = useState<FileMenuAnchor | null>(null)
   const [sort, setSort] = useState<'updated' | 'name' | 'size'>('updated')
   useEffect(() => {
     if (!menu) return
@@ -222,7 +232,11 @@ export function LibraryWorkspace(p: Props) {
   useEffect(() => {
     setChecked(new Set())
     setMenu(null)
+    setContext(null)
   }, [p.view, p.query, p.type, p.selectionEpoch])
+  useEffect(() => {
+    setContext(null)
+  }, [layout, p.busy, p.loading])
   useEffect(() => {
     setTab('preview')
     setMenu(null)
@@ -246,11 +260,118 @@ export function LibraryWorkspace(p: Props) {
       setChecked(new Set())
       p.onNotice('已移入回收站，可随时恢复')
     })
-  const restore = (doc: DocumentRecord) =>
+  const restore = (docs: DocumentRecord[]) =>
     void p.onAction(async () => {
-      await window.localDocs!.restoreDocument(doc.id)
+      for (const doc of docs) await window.localDocs!.restoreDocument(doc.id)
+      setChecked(new Set())
       p.onNotice('已恢复文档')
     })
+  const copyPath = (doc: DocumentRecord) =>
+    void p.onAction(async () => {
+      await window.localDocs!.copyDocumentPath(doc.id)
+      p.onNotice('已复制文档库内副本路径')
+    })
+  const favorites = (docs: DocumentRecord[], favorite: boolean) =>
+    void p.onAction(async () => {
+      await window.localDocs!.setFavorites(
+        docs.map((doc) => doc.id),
+        favorite,
+      )
+      p.onNotice(favorite ? '已收藏选中的文件' : '已取消收藏')
+    })
+  const showContext = (
+    event: MouseEvent<HTMLElement> | ReactKeyboardEvent<HTMLElement>,
+    doc: DocumentRecord,
+  ) => {
+    event.preventDefault()
+    if (p.busy || p.loading) return
+    const target = event.currentTarget
+    const rect = target.getBoundingClientRect()
+    const ids = checked.has(doc.id) ? checkedVisible.map((item) => item.id) : [doc.id]
+    if (!checked.has(doc.id)) setChecked(new Set())
+    p.onSelect(doc.id)
+    setMenu(null)
+    setContext({
+      ids,
+      target,
+      x: 'clientX' in event && event.clientX ? event.clientX : rect.left + 24,
+      y: 'clientY' in event && event.clientY ? event.clientY : rect.top + Math.min(rect.height, 40),
+    })
+  }
+  const contextKey = (event: ReactKeyboardEvent<HTMLElement>, doc: DocumentRecord) => {
+    if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      showContext(event, doc)
+      return true
+    }
+    return false
+  }
+  const contextDocs = context ? documents.filter((doc) => context.ids.includes(doc.id)) : []
+  const contextItems: FileMenuItem[] = []
+  if (contextDocs.length) {
+    const first = contextDocs[0],
+      single = contextDocs.length === 1
+    if (first.deletedAt) {
+      contextItems.push({
+        label: single ? '恢复文档' : '恢复所选文件',
+        icon: <RotateCcw size={16} />,
+        action: () => restore(contextDocs),
+      })
+    } else {
+      if (single) {
+        contextItems.push({
+          label: '打开',
+          icon: <FolderOpen size={16} />,
+          action: () => p.onOpen(first),
+        })
+        if (canEditFile(first.extension))
+          contextItems.push({
+            label: '编辑',
+            icon: <Pencil size={16} />,
+            action: () => p.onOpen(first, 'edit'),
+          })
+        contextItems.push({
+          label: '重命名',
+          icon: <Pencil size={16} />,
+          action: () => p.onRename(first),
+        })
+      }
+      const allFavorite = contextDocs.every((doc) => doc.favorite)
+      contextItems.push(
+        {
+          label: allFavorite ? '取消收藏' : '收藏',
+          icon: <Star size={16} />,
+          action: () => favorites(contextDocs, !allFavorite),
+        },
+        {
+          label: '移动到分类',
+          icon: <FolderOpen size={16} />,
+          action: () => p.onMoveDocuments(contextDocs.map((doc) => doc.id)),
+        },
+      )
+    }
+    if (single)
+      contextItems.push(
+        { label: '导出', icon: <Download size={16} />, action: () => p.onExport(first) },
+        { label: '复制路径', icon: <Copy size={16} />, action: () => copyPath(first) },
+      )
+    contextItems.push(
+      first.deletedAt
+        ? {
+            label: '彻底删除',
+            icon: <Trash2 size={16} />,
+            danger: true,
+            divider: true,
+            action: () => p.onPurgeDocuments(contextDocs),
+          }
+        : {
+            label: '移入回收站',
+            icon: <Trash2 size={16} />,
+            danger: true,
+            divider: true,
+            action: () => trash(contextDocs),
+          },
+    )
+  }
   const toggleCheck = (id: string) =>
     setChecked((old) => {
       const next = new Set(old)
@@ -355,6 +476,16 @@ export function LibraryWorkspace(p: Props) {
   }
   return (
     <div className="library-shell">
+      {context && contextDocs.length > 0 && (
+        <FileContextMenu
+          anchor={context}
+          title={
+            contextDocs.length === 1 ? contextDocs[0].name : `已选择 ${contextDocs.length} 份文件`
+          }
+          items={contextItems}
+          onClose={() => setContext(null)}
+        />
+      )}
       <header className="library-topbar">
         <div className="library-brand">
           <img src="./icons/app.svg" alt="" />
@@ -603,56 +734,79 @@ export function LibraryWorkspace(p: Props) {
             {checkedVisible.length > 0 && (
               <div className="selection-toolbar">
                 <span>已选择 {checkedVisible.length} 项</span>
-                <button
-                  className="text-button"
-                  disabled={p.busy || p.view === 'trash'}
-                  onClick={() =>
-                    void p.onAction(async () => {
-                      await window.localDocs!.setFavorites(
-                        checkedVisible.map((d) => d.id),
-                        true,
-                      )
-                      p.onNotice('已收藏选中的文件')
-                    })
-                  }
-                >
-                  <Star size={15} />
-                  批量收藏
-                </button>
-                {p.view === 'favorites' && (
-                  <button
-                    className="text-button"
-                    disabled={p.busy}
-                    onClick={() =>
-                      void p.onAction(async () => {
-                        await window.localDocs!.setFavorites(
-                          checkedVisible.map((d) => d.id),
-                          false,
-                        )
-                        setChecked(new Set())
-                        p.onNotice('已取消收藏')
-                      })
-                    }
-                  >
-                    取消所选收藏
-                  </button>
+                {p.view !== 'trash' ? (
+                  <>
+                    <button
+                      className="text-button"
+                      disabled={p.busy}
+                      onClick={() =>
+                        void p.onAction(async () => {
+                          await window.localDocs!.setFavorites(
+                            checkedVisible.map((d) => d.id),
+                            true,
+                          )
+                          p.onNotice('已收藏选中的文件')
+                        })
+                      }
+                    >
+                      <Star size={15} />
+                      批量收藏
+                    </button>
+                    {p.view === 'favorites' && (
+                      <button
+                        className="text-button"
+                        disabled={p.busy}
+                        onClick={() =>
+                          void p.onAction(async () => {
+                            await window.localDocs!.setFavorites(
+                              checkedVisible.map((d) => d.id),
+                              false,
+                            )
+                            setChecked(new Set())
+                            p.onNotice('已取消收藏')
+                          })
+                        }
+                      >
+                        取消所选收藏
+                      </button>
+                    )}
+                    <button
+                      className="text-button"
+                      disabled={p.busy}
+                      onClick={() => p.onMoveDocuments(checkedVisible.map((d) => d.id))}
+                    >
+                      <FolderOpen size={15} />
+                      移动到分类
+                    </button>
+                    <button
+                      className="text-button"
+                      disabled={p.busy}
+                      onClick={() => trash(checkedVisible)}
+                    >
+                      <Trash2 size={15} />
+                      移入回收站
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="text-button"
+                      disabled={p.busy}
+                      onClick={() => restore(checkedVisible)}
+                    >
+                      <RotateCcw size={15} />
+                      恢复所选文件
+                    </button>
+                    <button
+                      className="text-button"
+                      disabled={p.busy}
+                      onClick={() => p.onPurgeDocuments(checkedVisible)}
+                    >
+                      <Trash2 size={15} />
+                      彻底删除
+                    </button>
+                  </>
                 )}
-                <button
-                  className="text-button"
-                  disabled={p.busy || p.view === 'trash'}
-                  onClick={() => p.onMoveDocuments(checkedVisible.map((d) => d.id))}
-                >
-                  <FolderOpen size={15} />
-                  移动到分类
-                </button>
-                <button
-                  className="text-button"
-                  disabled={p.busy || p.view === 'trash'}
-                  onClick={() => trash(checkedVisible)}
-                >
-                  <Trash2 size={15} />
-                  移入回收站
-                </button>
                 <button
                   className="icon-button"
                   aria-label="取消选择"
@@ -725,9 +879,11 @@ export function LibraryWorkspace(p: Props) {
                         tabIndex={0}
                         aria-selected={p.selected?.id === doc.id}
                         className={p.selected?.id === doc.id ? 'selected' : ''}
+                        onContextMenu={(event) => showContext(event, doc)}
                         onClick={() => p.onSelect(doc.id)}
                         onDoubleClick={() => !p.busy && p.onOpen(doc)}
                         onKeyDown={(event) => {
+                          if (contextKey(event, doc)) return
                           if (event.target !== event.currentTarget) return
                           if (event.key === 'Enter' && !p.busy) p.onOpen(doc)
                           if (event.key === ' ') {
@@ -781,18 +937,32 @@ export function LibraryWorkspace(p: Props) {
               ) : (
                 <div className="file-grid">
                   {documents.map((doc) => (
-                    <button
+                    <div
                       key={doc.id}
                       className={`file-card ${p.selected?.id === doc.id ? 'selected' : ''}`}
-                      onClick={() => p.onSelect(doc.id)}
-                      onDoubleClick={() => !p.busy && p.onOpen(doc)}
+                      onContextMenu={(event) => showContext(event, doc)}
+                      onKeyDown={(event) => contextKey(event, doc)}
+                      tabIndex={-1}
                     >
-                      <FileIcon doc={doc} large />
-                      <strong>{doc.name}</strong>
-                      <span>
-                        {fileType(doc)} · {fileSize(doc.size)}
-                      </span>
-                    </button>
+                      <input
+                        type="checkbox"
+                        className="file-card-check"
+                        aria-label={`选择 ${doc.name}`}
+                        checked={checked.has(doc.id)}
+                        onChange={() => toggleCheck(doc.id)}
+                      />
+                      <button
+                        className="file-card-open"
+                        onClick={() => p.onSelect(doc.id)}
+                        onDoubleClick={() => !p.busy && p.onOpen(doc)}
+                      >
+                        <FileIcon doc={doc} large />
+                        <strong>{doc.name}</strong>
+                        <span>
+                          {fileType(doc)} · {fileSize(doc.size)}
+                        </span>
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -826,7 +996,7 @@ export function LibraryWorkspace(p: Props) {
                         <div className="popover">
                           <button
                             onClick={() => {
-                              p.onRename()
+                              p.onRename(p.selected!)
                               setMenu(null)
                             }}
                             disabled={Boolean(p.selected.deletedAt)}
@@ -965,7 +1135,7 @@ export function LibraryWorkspace(p: Props) {
                       <button
                         className="primary"
                         disabled={p.busy}
-                        onClick={() => restore(p.selected!)}
+                        onClick={() => restore([p.selected!])}
                       >
                         <RotateCcw size={18} />
                         恢复文档
@@ -1008,6 +1178,16 @@ export function LibraryWorkspace(p: Props) {
                       <Copy size={18} />
                       <span>复制路径</span>
                     </button>
+                    {p.selected.deletedAt && (
+                      <button
+                        className="danger-outline"
+                        disabled={p.busy}
+                        onClick={() => p.onPurgeDocuments([p.selected!])}
+                      >
+                        <Trash2 size={18} />
+                        彻底删除
+                      </button>
+                    )}
                     {!p.selected.deletedAt && (
                       <button
                         className="danger-outline"

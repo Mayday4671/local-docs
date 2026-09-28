@@ -149,6 +149,7 @@ export interface LibraryApi {
   ): Promise<void>
   trashDocument(id: string): Promise<void>
   restoreDocument(id: string): Promise<void>
+  purgeDocuments(ids: string[]): Promise<{ deleted: number; pendingCleanup: number }>
   exportDocument(id: string): Promise<boolean>
   versions(id: string): Promise<VersionRecord[]>
   readVersion(id: string, versionId: string): Promise<VersionContent>
@@ -204,6 +205,7 @@ export const IPC = {
   updateDocument: 'library:update',
   trashDocument: 'library:trash',
   restoreDocument: 'library:restore',
+  purgeDocuments: 'library:purge',
   exportDocument: 'library:export',
   versions: 'library:versions',
   readVersion: 'library:read-version',
