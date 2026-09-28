@@ -2,6 +2,10 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { IPC, type LibraryApi } from '../shared/types'
 
 const api: Omit<LibraryApi, 'importDroppedFiles'> = {
+  storageInfo: () => ipcRenderer.invoke(IPC.storageInfo),
+  previewStorageLocation: () => ipcRenderer.invoke(IPC.previewStorageLocation),
+  discardStoragePreview: () => ipcRenderer.invoke(IPC.discardStoragePreview),
+  moveStorage: (token) => ipcRenderer.invoke(IPC.moveStorage, token),
   createOffice: (name, extension, categoryId) =>
     ipcRenderer.invoke(IPC.createOffice, name, extension, categoryId),
   annotations: (id) => ipcRenderer.invoke(IPC.annotations, id),

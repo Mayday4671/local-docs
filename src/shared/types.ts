@@ -84,6 +84,10 @@ export interface VersionContent {
   office: OfficeData | null
 }
 export interface LibraryApi {
+  storageInfo(): Promise<StorageInfo>
+  previewStorageLocation(): Promise<StorageMovePreview | null>
+  discardStoragePreview(): Promise<void>
+  moveStorage(token: string): Promise<StorageInfo>
   createOffice(
     name: string,
     extension: '.docx' | '.xlsx',
@@ -152,6 +156,10 @@ export interface LibraryApi {
 }
 
 export const IPC = {
+  storageInfo: 'storage:info',
+  previewStorageLocation: 'storage:preview',
+  discardStoragePreview: 'storage:discard',
+  moveStorage: 'storage:move',
   createOffice: 'library:create-office',
   annotations: 'library:annotations',
   saveAnnotation: 'library:save-annotation',
@@ -203,6 +211,20 @@ export const IPC = {
 } as const
 
 export type ThemePreference = 'system' | 'light' | 'dark'
+
+export interface StorageInfo {
+  path: string
+  defaultPath: string
+  notice: string
+}
+export interface StorageMovePreview {
+  token: string
+  source: string
+  target: string
+  files: number
+  versions: number
+  bytes: number
+}
 
 export type ExportScope = { kind: 'all' } | { kind: 'category'; id: string }
 export interface TransferResult {
@@ -281,7 +303,8 @@ export interface BackupPreview {
   bytes: number
 }
 export interface OperationStatus {
-  kind: 'backup' | 'preview' | 'restore' | 'export' | 'folder-scan' | 'folder-import'
+  kind:
+    'backup' | 'preview' | 'restore' | 'export' | 'folder-scan' | 'folder-import' | 'storage-move'
   phase: string
   completed: number
   total: number

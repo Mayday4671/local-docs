@@ -121,7 +121,7 @@ try {
   expect(await page.evaluate(() => window.localDocs.snapshot())).toEqual(before)
   expect(await page.evaluate((id) => window.localDocs.versions(id), seed.doc.id)).toEqual(history)
   expect(await page.evaluate(() => window.localDocs.getTheme())).toBe('dark')
-  const recovery = await readdir(join(userData, 'recovery-backups'))
+  const recovery = await readdir(join(before.storagePath, 'recovery-backups'))
   expect(recovery).toHaveLength(1)
   // Rebuilding derived Office data is exercised after the atomic restore.
   expect((await page.evaluate(() => window.localDocs.searchResults('端口'))).length).toBe(2)

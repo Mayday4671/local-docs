@@ -489,3 +489,48 @@
   border-radius: 6px;
   line-height: 1.7;
 }
+
+.storage-card > div {
+  min-width: 0;
+  flex: 1;
+}
+.storage-card small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.storage-card button {
+  flex-shrink: 0;
+}
+.storage-notice {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.storage-paths {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+.storage-paths dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+.storage-paths dd {
+  margin: 6px 0 18px;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+.storage-paths dd:last-child {
+  margin-bottom: 0;
+}
+.storage-move-dialog {
+  width: 620px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+.storage-move-dialog p {
+  line-height: 1.8;
+}

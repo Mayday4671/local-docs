@@ -6,6 +6,7 @@ const { version } = JSON.parse(await readFile(new URL('../package.json', import.
 const executablePath = resolve(process.argv[2] || `release/${version}/win-unpacked/我的文档库.exe`)
 await access(executablePath)
 for (const script of [
+  'scripts/storage-smoke.mjs',
   'scripts/file-import-smoke.mjs',
   'scripts/smoke.mjs',
   'scripts/office-smoke.mjs',

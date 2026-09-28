@@ -1,6 +1,6 @@
 {
   "name": "local-docs",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "description": "我的文档库：个人离线文档管理桌面应用",
   "author": "Mayday4671",
@@ -20,6 +20,8 @@
     "test:office": "npm run build && node scripts/office-smoke.mjs",
     "test:history": "npm run build && node scripts/history-smoke.mjs",
     "test:packaged": "node scripts/packaged-smoke.mjs",
+    "test:storage": "npm run build && node scripts/storage-smoke.mjs",
+    "test:installer-storage": "node scripts/installer-storage-smoke.mjs",
     "test:visual": "npm run build && node scripts/visual-smoke.mjs",
     "test:formatting": "npm run build && node scripts/formatting-smoke.mjs",
     "test:transfer": "npm run build && node scripts/transfer-smoke.mjs",

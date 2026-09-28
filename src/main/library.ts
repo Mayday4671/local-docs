@@ -12,7 +12,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
+import { backup, DatabaseSync } from 'node:sqlite'
 import { fileKind, canEditFile } from '../shared/file-types'
 import { plainTextPreview, plainTextIndex } from './text-preview'
 import { emptyState, validateAnnotation, validateState } from './document-state'
@@ -175,6 +175,16 @@ export class Library {
 
   close(): void {
     this.db.close()
+  }
+
+  /** SQLite's online backup includes committed WAL pages; never copy a live database file. */
+  async copyDatabase(destination: string): Promise<void> {
+    await backup(this.db, destination)
+  }
+
+  checkIntegrity(): void {
+    const rows = this.db.prepare('PRAGMA quick_check').all()
+    if (rows.length !== 1 || rows[0].quick_check !== 'ok') throw new Error('文档库数据库校验失败。')
   }
 
   backupManifest(): BackupManifest {

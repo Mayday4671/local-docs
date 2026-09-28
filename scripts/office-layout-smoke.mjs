@@ -150,6 +150,7 @@ try {
   await expect(cell('D4')).toHaveValue('重启后恢复的格子')
   await page.getByRole('button', { name: '返回列表', exact: true }).click()
   await page.getByRole('button', { name: '保留草稿并返回', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '全部文件', exact: true })).toBeVisible()
   await app.close()
   app = undefined
   page = await launch()

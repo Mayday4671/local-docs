@@ -4,6 +4,7 @@ release/
 coverage/
 test-results/
 .local-docs/
+/data/
 *.log
 *.tsbuildinfo
 .env

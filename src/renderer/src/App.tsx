@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, Download, HardDrive, History, Library, Save, Star, X } from 'lucide-react'
 import { ThemeSwitcher } from './ThemeSwitcher'
-import { StorageActions, TransferDialogs } from './StorageTools'
+import { StorageActions, TransferDialogs, StorageMoveDialog } from './StorageTools'
 import {
   CategoryDialog,
   MoveDialog,
@@ -34,6 +34,8 @@ import type {
   FolderImportResult,
   Draft,
   Attachment,
+  StorageInfo,
+  StorageMovePreview,
 } from '../../shared/types'
 
 const api = window.localDocs
@@ -77,7 +79,15 @@ export function App() {
   const [selectionEpoch, setSelectionEpoch] = useState(0)
   const [folderPreview, setFolderPreview] = useState<FolderImportPreview | null>(null)
   const [folderResult, setFolderResult] = useState<FolderImportResult | null>(null)
-  const organizing = !!(managedCategory || moveIds || folderPreview || folderResult)
+  const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
+  const [storagePreview, setStoragePreview] = useState<StorageMovePreview | null>(null)
+  const organizing = !!(
+    managedCategory ||
+    moveIds ||
+    folderPreview ||
+    folderResult ||
+    storagePreview
+  )
   const [error, setError] = useState('')
   const [noticeState, setNoticeState] = useState({ text: '', sequence: 0 })
   const notice = noticeState.text
@@ -118,6 +128,13 @@ export function App() {
   const [name, setName] = useState('')
   const [newExtension, setNewExtension] = useState<'.docx' | '.xlsx' | null>(null)
   const [createParent, setCreateParent] = useState<string | null>(null)
+  useEffect(() => {
+    if (modal === 'settings')
+      void api
+        ?.storageInfo()
+        .then(setStorageInfo)
+        .catch((e) => setError(String(e)))
+  }, [modal, snapshot.storagePath])
   const searchRef = useRef<HTMLInputElement>(null)
   const selected = snapshot.documents.find(
     (doc) => doc.id === selectedId && (view === 'trash' ? Boolean(doc.deletedAt) : !doc.deletedAt),
@@ -925,9 +942,28 @@ export function App() {
                   <div>
                     <strong>文档库位置</strong>
                     <p>{snapshot.storagePath}</p>
+                    <small>
+                      默认位置：{storageInfo?.defaultPath || '安装目录下的 data/library'}
+                    </small>
                   </div>
+                  <button
+                    className="secondary"
+                    disabled={busy || !!editor}
+                    onClick={() =>
+                      void perform(async () =>
+                        setStoragePreview(await api!.previewStorageLocation()),
+                      )
+                    }
+                  >
+                    修改位置
+                  </button>
                 </div>
-                <p className="muted">版本 0.9.0 · 测试版</p>
+                {storageInfo?.notice && (
+                  <p className="storage-notice" role="status">
+                    {storageInfo.notice}
+                  </p>
+                )}
+                <p className="muted">版本 0.10.0 · 测试版</p>
                 <p>原文件不会随导入而移动或删除。文档副本、分类和历史版本保存在上述目录。</p>
                 <StorageActions
                   onBackup={backupLibrary}
@@ -1091,6 +1127,28 @@ export function App() {
             setQuery('')
             setType('all')
             navigate(destination ? `category:${destination}` : 'all')
+          }}
+        />
+      )}
+      {storagePreview && (
+        <StorageMoveDialog
+          preview={storagePreview}
+          onCancel={() => {
+            setStoragePreview(null)
+            void perform(async () => api!.discardStoragePreview())
+          }}
+          onMove={() => {
+            const token = storagePreview.token
+            setStoragePreview(null)
+            void transfer(async () => {
+              const info = await api!.moveStorage(token)
+              setStorageInfo(info)
+              setTransferResult(null)
+              setSelectedId(null)
+              setPreview(null)
+              await refresh()
+              setNotice('文档库已迁移，新位置已生效')
+            })
           }}
         />
       )}

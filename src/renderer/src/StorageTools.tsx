@@ -1,5 +1,10 @@
 import { Archive, Download, FolderOpen, RotateCcw } from 'lucide-react'
-import type { BackupPreview, OperationStatus, TransferResult } from '../../shared/types'
+import type {
+  BackupPreview,
+  OperationStatus,
+  TransferResult,
+  StorageMovePreview,
+} from '../../shared/types'
 import { fileSize } from './LibraryWorkspace'
 
 export function StorageActions({
@@ -156,6 +161,51 @@ export function TransferDialogs({
           </button>
           <button className="primary" onClick={onRestore}>
             备份当前资料并恢复
+          </button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+export function StorageMoveDialog({
+  preview,
+  onCancel,
+  onMove,
+}: {
+  preview: StorageMovePreview
+  onCancel: () => void
+  onMove: () => void
+}) {
+  return (
+    <div className="modal-backdrop transfer-backdrop">
+      <section
+        className="modal storage-move-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="storage-move-title"
+      >
+        <h2 id="storage-move-title">修改文档库位置</h2>
+        <p>把当前文档库迁移到新文件夹，完成后立即生效。</p>
+        <dl className="storage-paths">
+          <dt>当前位置</dt>
+          <dd>{preview.source}</dd>
+          <dt>新位置</dt>
+          <dd>{preview.target}</dd>
+        </dl>
+        <p>
+          {preview.files} 份文件（含回收站） · {preview.versions} 个历史版本 ·{' '}
+          {fileSize(preview.bytes)}
+        </p>
+        <p className="muted">
+          文件、分类、收藏、标记、图片附件、恢复草稿与历史版本会一起复制并校验。旧位置的副本会保留，不再自动同步；取消或失败时继续使用原位置。
+        </p>
+        <div className="modal-actions">
+          <button autoFocus className="secondary" onClick={onCancel}>
+            取消
+          </button>
+          <button className="primary" onClick={onMove}>
+            迁移并使用此位置
           </button>
         </div>
       </section>

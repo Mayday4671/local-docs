@@ -11,7 +11,7 @@ import {
   session,
   shell,
 } from 'electron'
-import { basename, isAbsolute, join, relative, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { lstatSync, readFileSync, statSync } from 'node:fs'
 import { setImmediate as yieldToEvents } from 'node:timers/promises'
@@ -20,6 +20,7 @@ import { Library } from './library'
 import { OfficeService } from './office-service'
 import { TransferService } from './transfer-service'
 import { FolderImportService } from './folder-import-service'
+import { StorageLocation } from './storage-location'
 import { IPC, type ImportResult, type LibraryApi } from '../shared/types'
 
 app.setName('我的文档库')
@@ -35,9 +36,10 @@ protocol.registerSchemesAsPrivileged([
 const locked = app.requestSingleInstanceLock()
 let window: BrowserWindow | null = null
 let library: Library | undefined
-let office: OfficeService | undefined
+let activeOffice: OfficeService | undefined
 let transfers: TransferService | undefined
 let folderImports: FolderImportService | undefined
+let storage: StorageLocation | undefined
 if (!locked) app.quit()
 
 function windowColors() {
@@ -73,11 +75,11 @@ function createWindow(): void {
   })
   window = mainWindow
   mainWindow.on('close', (event) => {
-    if (transfers?.active || folderImports?.active) {
+    if (transfers?.active || folderImports?.active || storage?.active) {
       event.preventDefault()
       void dialog.showMessageBox(mainWindow, {
         type: 'info',
-        message: '文件导入、备份、恢复或导出仍在进行。',
+        message: '文件导入、备份、恢复、导出或存储迁移仍在进行。',
         detail: '请等待完成，或在操作窗口中取消后再关闭应用。',
       })
     }
@@ -147,6 +149,35 @@ function registerApi(
     return result
   }
   const api: LibraryApi = {
+    storageInfo: async () => storage!.info(store),
+    previewStorageLocation: async () => {
+      storage!.discardPreview()
+      const choice = await dialog.showOpenDialog(window!, {
+        title: '选择新的文档库位置（空文件夹）',
+        defaultPath: dirname(store.root),
+        properties: ['openDirectory', 'createDirectory'],
+        buttonLabel: '选择此位置',
+      })
+      return choice.canceled || !choice.filePaths[0]
+        ? null
+        : storage!.prepare(store, choice.filePaths[0])
+    },
+    discardStoragePreview: async () => storage!.discardPreview(),
+    moveStorage: async (token) => {
+      await transfer.discardPreview()
+      folders.discardPreview()
+      const replacement = await storage!.move(store, token)
+      const original = store
+      office.dispose()
+      store = library = replacement
+      office = activeOffice = new OfficeService(store)
+      // The large temporary files and recovery backups follow the selected storage volume.
+      transfer = transfers = new TransferService(store, store.root)
+      folders = folderImports = new FolderImportService(store, store.root)
+      generation++
+      original.close()
+      return storage!.info(store)
+    },
     createOffice: async (name, extension, categoryId) =>
       store.createOffice(name, extension, categoryId),
     annotations: async (id) => store.annotations(id),
@@ -248,10 +279,12 @@ function registerApi(
         ? null
         : transfer.export(choice.filePaths[0], scope)
     },
-    operationStatus: async () => transfer.getStatus() ?? folders.getStatus(),
+    operationStatus: async () =>
+      storage!.getStatus() ?? transfer.getStatus() ?? folders.getStatus(),
     cancelOperation: async () => {
       transfer.cancel()
       folders.cancel()
+      storage!.cancel()
     },
     revealTransferResult: async () => {
       if (transfer.lastResultPath) shell.showItemInFolder(transfer.lastResultPath)
@@ -336,11 +369,12 @@ function registerApi(
       if (!trusted) throw new Error('拒绝来自未知页面的请求。')
       const invoke = () => (api[key] as (...values: unknown[]) => Promise<unknown>)(...args)
       if (key === 'operationStatus' || key === 'cancelOperation') return invoke()
-      if (transfer.active || folders.active)
-        throw new Error('请等待文件导入、备份、恢复或导出完成。')
+      if (transfer.active || folders.active || storage!.active)
+        throw new Error('请等待文件导入、备份、恢复、导出或存储迁移完成。')
       const acceptedGeneration = generation
       const result = queue.then(() => {
-        if (generation !== acceptedGeneration) throw new Error('文档库已恢复，请重新操作。')
+        if (generation !== acceptedGeneration)
+          throw new Error('文档库位置或内容已切换，请重新操作。')
         return invoke()
       })
       queue = result.catch(() => {})
@@ -356,7 +390,7 @@ if (locked) {
   })
   void app
     .whenReady()
-    .then(() => {
+    .then(async () => {
       session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) =>
         callback(false),
       )
@@ -392,12 +426,54 @@ if (locked) {
           return new Response('Forbidden', { status: 403 })
         return net.fetch(pathToFileURL(path).toString())
       })
-      library = new Library(join(app.getPath('userData'), 'library'))
+      const testInstallation =
+        process.env.LOCAL_DOCS_SMOKE === '1' && process.env.LOCAL_DOCS_TEST_INSTALL_DIR
+      storage = new StorageLocation(
+        app.getPath('userData'),
+        testInstallation || (app.isPackaged ? dirname(app.getPath('exe')) : app.getAppPath()),
+        process.env.LOCAL_DOCS_DATA_DIR && !testInstallation
+          ? join(app.getPath('userData'), 'library')
+          : undefined,
+      )
+      try {
+        library = await storage.open()
+      } catch (initialError) {
+        let error = initialError
+        while (!library) {
+          const choice = await dialog.showMessageBox({
+            type: 'error',
+            title: '文档库位置不可用',
+            message: error instanceof Error ? error.message : String(error),
+            detail:
+              '可以重新选择已有文档库。首次使用时也可选择有写入权限的空文件夹。原有资料不会被删除。',
+            buttons: ['重新选择位置', '退出'],
+            defaultId: 0,
+            cancelId: 1,
+          })
+          if (choice.response !== 0) {
+            app.quit()
+            return
+          }
+          const folder = await dialog.showOpenDialog({
+            title: '选择文档库位置',
+            properties: ['openDirectory', 'createDirectory'],
+          })
+          if (folder.canceled || !folder.filePaths[0]) {
+            app.quit()
+            return
+          }
+          try {
+            library = await storage.recoverLocation(folder.filePaths[0])
+          } catch (nextError) {
+            error = nextError
+          }
+        }
+      }
       nativeTheme.themeSource = library.getTheme()
-      office = new OfficeService(library)
-      transfers = new TransferService(library, app.getPath('userData'))
-      folderImports = new FolderImportService(library, app.getPath('userData'))
-      registerApi(library, office, transfers, folderImports)
+      activeOffice = new OfficeService(library)
+      transfers = new TransferService(library, library.root)
+      folderImports = new FolderImportService(library, library.root)
+      registerApi(library, activeOffice, transfers, folderImports)
       createWindow()
     })
     .catch((error) => {
@@ -411,10 +487,10 @@ if (locked) {
     if (process.platform !== 'darwin') app.quit()
   })
   app.on('will-quit', () => {
-    office?.dispose()
+    activeOffice?.dispose()
     library?.close()
   })
   app.on('before-quit', (event) => {
-    if (transfers?.active || folderImports?.active) event.preventDefault()
+    if (transfers?.active || folderImports?.active || storage?.active) event.preventDefault()
   })
 }
