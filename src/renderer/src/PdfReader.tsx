@@ -1,4 +1,5 @@
-import { Select } from './Select'
+import { ZoomSelect } from './ZoomSelect'
+import { useCtrlWheelZoom } from './useCtrlWheelZoom'
 import { useEffect, useRef, useState } from 'react'
 import {
   getDocument,
@@ -17,11 +18,13 @@ const assets = new URL('./pdf-assets/', document.baseURI).href
 export default function PdfReader({ doc }: { doc: DocumentRecord }) {
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null)
   const [page, setPage] = useState(1),
-    [zoom, setZoom] = useState(1)
+    [zoom, setZoom] = useState(100)
   const [error, setError] = useState(''),
     [loading, setLoading] = useState(true)
   const [text, setText] = useState('')
   const canvasHost = useRef<HTMLDivElement>(null)
+  const reader = useRef<HTMLDivElement>(null)
+  useCtrlWheelZoom(reader, setZoom, !!pdf && !error)
   const [availableWidth, setAvailableWidth] = useState(0)
   useEffect(() => {
     if (!pdf || !canvasHost.current) return
@@ -79,9 +82,9 @@ export default function PdfReader({ doc }: { doc: DocumentRecord }) {
       .then(async (value) => {
         if (!active) return
         const fit = Math.min(1, availableWidth / value.getViewport({ scale: 1 }).width)
-        const base = value.getViewport({ scale: zoom * fit })
+        const base = value.getViewport({ scale: (zoom / 100) * fit })
         const scale =
-          zoom *
+          (zoom / 100) *
           fit *
           Math.min(
             window.devicePixelRatio || 1,
@@ -121,7 +124,7 @@ export default function PdfReader({ doc }: { doc: DocumentRecord }) {
   }, [pdf, page, zoom, availableWidth])
   if (error) return <FileFallback doc={doc} message={error} />
   return (
-    <div className="pdf-reader">
+    <div className="pdf-reader" ref={reader}>
       <div className="pdf-tools">
         <button
           className="secondary"
@@ -138,20 +141,10 @@ export default function PdfReader({ doc }: { doc: DocumentRecord }) {
         >
           下一页
         </button>
-        <Select
-          aria-label="PDF 缩放"
-          value={zoom}
-          onChange={(e) => setZoom(Number(e.target.value))}
-        >
-          {[0.75, 1, 1.25, 1.5, 2].map((z) => (
-            <option key={z} value={z}>
-              {z * 100}%
-            </option>
-          ))}
-        </Select>
+        <ZoomSelect label="PDF 缩放" value={zoom} onChange={setZoom} disabled={!pdf} />
       </div>
       {loading && (
-        <p className="muted" role="status">
+        <p className="pdf-loading" role="status">
           正在渲染页面…
         </p>
       )}

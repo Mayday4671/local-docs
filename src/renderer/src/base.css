@@ -164,6 +164,7 @@ select:disabled {
     padding: 5px;
     margin-block: 5px;
     width: anchor-size(width);
+    min-width: 112px;
     max-width: calc(100vw - 24px);
     max-height: min(320px, 45vh);
     position-try-order: normal;
@@ -204,6 +205,13 @@ select:disabled {
     color: var(--muted);
     cursor: not-allowed;
   }
+  select.zoom-select option {
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+}
+select.zoom-select {
+  min-width: 88px;
 }
 .muted {
   color: var(--muted);

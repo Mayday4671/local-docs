@@ -93,7 +93,7 @@ try {
   await expect(pdf.locator('pre')).toContainText('Offline PDF - page one')
   await pdf.getByRole('button', { name: '下一页' }).click()
   await expect(pdf.locator('pre')).toContainText('离线预览测试')
-  await pdf.getByLabel('PDF 缩放').selectOption('1.5')
+  await pdf.getByLabel('PDF 缩放').selectOption('150')
   await expect(pdf.locator('canvas')).toBeVisible()
   await expect(pdf.getByRole('status')).toHaveCount(0)
   expect(

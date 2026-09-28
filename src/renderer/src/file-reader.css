@@ -51,8 +51,25 @@
   height: auto;
 }
 .pdf-reader {
+  position: relative;
   min-height: 100%;
   background: var(--surface-muted);
+}
+/* Keep rendering status and scrollbars from changing the width used to fit the page. */
+.reading-content:has(.pdf-reader) {
+  scrollbar-gutter: stable;
+}
+.pdf-loading {
+  position: absolute;
+  top: 72px;
+  left: 16px;
+  z-index: 1;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: var(--muted);
+  background: var(--surface);
+  pointer-events: none;
 }
 .pdf-tools {
   position: sticky;

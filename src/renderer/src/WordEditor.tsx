@@ -1,4 +1,5 @@
-import { Select } from './Select'
+import { ZoomSelect } from './ZoomSelect'
+import { useCtrlWheelZoom } from './useCtrlWheelZoom'
 import { useEffect, useRef, useState } from 'react'
 import { Search, Plus } from 'lucide-react'
 import type { OfficeChange, OfficeEditField, OfficeEditModel } from '../../shared/types'
@@ -63,6 +64,8 @@ export function WordEditor({
   const [hint, setHint] = useState('点击页面中的文字直接修改；表格和图片保留在原来的位置。')
   const [filter, setFilter] = useState('')
   const [zoom, setZoom] = useState(100)
+  const workspace = useRef<HTMLDivElement>(null)
+  useCtrlWheelZoom(workspace, setZoom)
   const append = model.fields.find((f) => f.key.endsWith(':append'))
   const appendRef = useRef<HTMLTextAreaElement>(null)
   const [showAppend, setShowAppend] = useState(!!changes.find((c) => c.key === append?.key))
@@ -213,7 +216,7 @@ export function WordEditor({
       setHint(found ? '已定位匹配文字，黄色边框为查找结果。' : '可编辑文字中没有找到匹配内容。')
   }
   return (
-    <div className="word-edit-workspace">
+    <div className="word-edit-workspace" ref={workspace}>
       <div className="office-context-toolbar">
         <form
           className="office-find"
@@ -249,17 +252,7 @@ export function WordEditor({
         </button>
         <label className="office-zoom">
           缩放
-          <Select
-            aria-label="文档缩放"
-            value={zoom}
-            onChange={(e) => setZoom(Number(e.target.value))}
-          >
-            {[75, 90, 100, 125, 150].map((v) => (
-              <option key={v} value={v}>
-                {v}%
-              </option>
-            ))}
-          </Select>
+          <ZoomSelect label="文档缩放" value={zoom} onChange={setZoom} />
         </label>
       </div>
       <div className="word-edit-scroll">
