@@ -56,22 +56,30 @@ async function dragTo(page, ratio) {
   await page.mouse.up()
 }
 async function previewToggle(page, name) {
-  await page.getByRole('button', { name: '列表选项', exact: true }).click()
-  await page.getByRole('button', { name, exact: true }).click()
+  const button = page.getByRole('button', { name, exact: true })
+  await expect(button).toBeVisible()
+  await button.click()
 }
 async function actionsFit(page) {
+  await expect(page.getByRole('button', { name: '收起预览', exact: true })).toBeVisible()
   expect(
-    await page.locator('.preview-actions').evaluate((bar) => {
-      const panel = bar.closest('.preview-panel').getBoundingClientRect()
-      return [...bar.querySelectorAll('button')].every((button) => {
-        const box = button.getBoundingClientRect()
-        return box.left >= panel.left && box.right <= panel.right && box.bottom <= panel.bottom
-      })
+    await page.locator('.preview-panel').evaluate((root) => {
+      const panel = root.getBoundingClientRect()
+      return [...root.querySelectorAll('.preview-actions button, .preview-info button')].every(
+        (button) => {
+          const box = button.getBoundingClientRect()
+          return box.left >= panel.left && box.right <= panel.right && box.bottom <= panel.bottom
+        },
+      )
     }),
   ).toBe(true)
 }
 try {
   let page = await launch()
+  await previewToggle(page, '收起预览')
+  await expect(page.locator('.preview-panel')).toHaveCount(0)
+  await previewToggle(page, '展开预览')
+  await expect(page.getByText('选择文件以预览', { exact: true })).toBeVisible()
   await dragTo(page, 0.7)
   await divider(page).dblclick()
   await expect.poll(async () => (await sizes(page)).ratio).toBeCloseTo(0.616, 2)
@@ -95,6 +103,11 @@ try {
   await page.evaluate(() => window.localDocs.importFiles(null))
   await page.reload()
   await page.getByRole('row', { name: /首页笔记.md/ }).click()
+  await page.getByRole('button', { name: '文档选项', exact: true }).click()
+  await expect(page.locator('.preview-info .popover')).not.toContainText('收起预览')
+  await previewToggle(page, '收起预览')
+  await previewToggle(page, '展开预览')
+  await expect(page.locator('.preview-info .popover')).toHaveCount(0)
   await page.getByRole('checkbox', { name: '选择 首页笔记.md', exact: true }).check()
   await expect(page.locator('.reading-content .markdown-body')).toBeVisible()
   await page.locator('.reading-content').evaluate((e) => {

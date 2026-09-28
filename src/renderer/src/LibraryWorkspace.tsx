@@ -17,7 +17,6 @@ import {
   LayoutGrid,
   List,
   MoreVertical,
-  PanelRightClose,
   PanelRightOpen,
   Pencil,
   Plus,
@@ -476,7 +475,7 @@ export function LibraryWorkspace(p: Props) {
                   <h1>{p.batchOnly ? '本批添加的文件' : p.viewLabel}</h1>
                 )}
               </div>
-              <div className="menu-anchor">
+              <div className="menu-anchor panel-header-actions">
                 <button
                   className="icon-button"
                   aria-label="列表选项"
@@ -538,15 +537,6 @@ export function LibraryWorkspace(p: Props) {
                       <Download size={17} />
                       {categoryId ? '导出此分类（含子分类）' : '导出整个文档库'}
                     </button>
-                    <button
-                      onClick={() => {
-                        p.onPreviewToggle()
-                        setMenu(null)
-                      }}
-                    >
-                      {p.previewOpen ? <PanelRightClose size={17} /> : <PanelRightOpen size={17} />}
-                      {p.previewOpen ? '收起预览' : '展开预览'}
-                    </button>
                     <label>
                       类型
                       <select
@@ -578,6 +568,19 @@ export function LibraryWorkspace(p: Props) {
                       </select>
                     </label>
                   </div>
+                )}
+                {!p.previewOpen && (
+                  <button
+                    className="icon-button"
+                    aria-label="展开预览"
+                    title="展开预览"
+                    onClick={() => {
+                      p.onPreviewToggle()
+                      setMenu(null)
+                    }}
+                  >
+                    <PanelRightOpen size={20} />
+                  </button>
                 )}
               </div>
             </header>
@@ -796,11 +799,6 @@ export function LibraryWorkspace(p: Props) {
               <span>
                 共 {documents.length} 个文件{p.query ? ` · 搜索“${p.query}”` : ''}
               </span>
-              {!p.previewOpen && (
-                <button className="icon-button" aria-label="展开预览" onClick={p.onPreviewToggle}>
-                  <PanelRightOpen size={18} />
-                </button>
-              )}
             </footer>
           </section>
           {p.previewOpen && (
@@ -814,7 +812,7 @@ export function LibraryWorkspace(p: Props) {
                       <span>{fileSize(p.selected.size)}</span>
                       <p>修改时间：{fileDate(p.selected.updatedAt)}</p>
                     </div>
-                    <div className="menu-anchor">
+                    <div className="menu-anchor panel-header-actions">
                       <button
                         className="icon-button"
                         aria-label="文档选项"
@@ -853,17 +851,19 @@ export function LibraryWorkspace(p: Props) {
                             <Download size={16} />
                             导出
                           </button>
-                          <button
-                            onClick={() => {
-                              p.onPreviewToggle()
-                              setMenu(null)
-                            }}
-                          >
-                            <PanelRightClose size={16} />
-                            收起预览
-                          </button>
                         </div>
                       )}
+                      <button
+                        className="icon-button"
+                        aria-label="收起预览"
+                        title="收起预览"
+                        onClick={() => {
+                          p.onPreviewToggle()
+                          setMenu(null)
+                        }}
+                      >
+                        <X size={20} />
+                      </button>
                     </div>
                   </div>
                   <div className="preview-tabs" role="tablist" aria-label="文档详情">
@@ -1025,10 +1025,11 @@ export function LibraryWorkspace(p: Props) {
                     文档预览
                     <button
                       className="icon-button"
-                      aria-label="关闭预览"
+                      aria-label="收起预览"
+                      title="收起预览"
                       onClick={p.onPreviewToggle}
                     >
-                      <X size={17} />
+                      <X size={20} />
                     </button>
                   </div>
                   <div className="preview-empty">

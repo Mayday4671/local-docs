@@ -1,12 +1,12 @@
 # Windows 交付说明
 
-日期：2026-09-28。当前版本：0.10.1 开发测试版。
+日期：2026-09-28。当前版本：0.10.2 开发测试版。
 
 ## 安装包
 
-`release/0.10.1/local-docs-0.10.1-x64-setup.exe`，116,466,772 字节（约 111 MiB）。
+`release/0.10.2/local-docs-0.10.2-x64-setup.exe`，116,467,015 字节（约 111 MiB）。
 
-在线下载：[EXE 安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.1/local-docs-0.10.1-x64-setup.exe) · [发布说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.1) · [SHA256SUMS.txt](https://github.com/Mayday4671/local-docs/releases/download/v0.10.1/SHA256SUMS.txt)。以测试版发布。
+在线下载：[EXE 安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.2/local-docs-0.10.2-x64-setup.exe) · [发布说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.2) · [SHA256SUMS.txt](https://github.com/Mayday4671/local-docs/releases/download/v0.10.2/SHA256SUMS.txt)。以测试版发布。
 
 保存并关闭旧版窗口后，双击 EXE，按照中文向导安装。应用包含运行环境、界面、数据库引擎和本地文档解析，不需要另装 Node.js、npm、Office、WebView2 或服务器。安装与日常使用无需联网，可用 U 盘携带安装包。安装包尚未数字签名。
 
@@ -17,6 +17,8 @@
 地址配置和浏览器缓存仍在 `%APPDATA%/local-docs/`，其中 `storage-location.json` 只保存文档库路径。本次不改变 schema v5 或备份 v2；含 0.9.0 新增文件类型的备份应使用 0.9.0 或更新版本恢复。跨电脑继续使用完整备份 / 恢复。
 
 ## 本次修正
+
+0.10.2 将首页“收起预览”从菜单移到预览区右上角，使用常驻的“×”图标，选中文件和空状态保持一致。收起后，列表右上角显示展开图标，点击恢复预览及此前的分栏宽度；两个菜单中不再显示重复的收起 / 展开文字项。
 
 0.10.1 为安装向导设置原生的 `InstallDir`，浏览文件夹时立即补上英文子目录 `local-docs`。例如选择 `D:\Soft` 后，路径框显示 `D:\Soft\local-docs`；默认资料位于 `D:\Soft\local-docs\data\library`。直接选中已有的 local-docs 文件夹不会重复追加。升级保留已登记的安装位置。
 
@@ -45,6 +47,13 @@
 Markdown 侧栏和编辑页支持表格、任务列表、删除线及代码缩进；Excel 侧栏改用真实工作表网格，并按数字格式显示日期、百分比、千分位和补零编号。修复 Office 编码换行和 Word 宽表访问问题。
 
 0.3.1 将主题入口从设置弹窗移至主界面和阅读 / 编辑页右上角。点击主题按钮即可选择浅色、深色、跟随系统，立即生效并自动记忆；键盘方向键、Esc 与点击菜单外关闭可用。切换不会重新读取文档，未保存的编辑内容保持不变。
+
+## 0.10.2 验收结果
+
+- 类型检查、格式检查、生产构建与中文 NSIS 打包通过。
+- 包内独立 EXE 的首页分栏与界面流程两组桌面回归通过。验证空预览 / 选中文件后的直接收起、展开、关闭菜单后展开不残留菜单、分栏宽度恢复、浅深主题和最窄预览面板内按钮可见；其余标签、搜索、收藏及网格切换流程正常。
+- 已检查浅色与深色小窗口截图；测试使用隔离文档库，发布包中没有个人文档或数据库。
+- 本轮仅调整预览操作入口，未重复运行完整存储 / Office 测试集或安装升级验收；未覆盖安装用户当前程序。安装包未签名。
 
 ## 0.10.1 验收结果
 

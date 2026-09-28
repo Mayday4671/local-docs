@@ -282,6 +282,11 @@
   position: relative;
   flex-shrink: 0;
 }
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .popover {
   position: absolute;
   z-index: 10;
