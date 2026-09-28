@@ -1,3 +1,4 @@
+import { Select } from './Select'
 import { useEffect, useState, type ReactNode, type RefObject } from 'react'
 import {
   BookOpen,
@@ -201,6 +202,7 @@ export function LibraryWorkspace(p: Props) {
       if (event.target instanceof Element && !event.target.closest('.menu-anchor')) setMenu(null)
     }
     const escape = (event: KeyboardEvent) => {
+      if (event.target instanceof Element && event.target.closest('select:open')) return
       if (event.key === 'Escape') setMenu(null)
     }
     window.addEventListener('pointerdown', outside)
@@ -539,7 +541,7 @@ export function LibraryWorkspace(p: Props) {
                     </button>
                     <label>
                       类型
-                      <select
+                      <Select
                         aria-label="文件类型"
                         value={p.type}
                         onChange={(event) => p.onType(event.target.value)}
@@ -551,11 +553,11 @@ export function LibraryWorkspace(p: Props) {
                         {['PDF', 'TXT', 'SQL', '文本', '图片', '其他'].map((type) => (
                           <option key={type}>{type}</option>
                         ))}
-                      </select>
+                      </Select>
                     </label>
                     <label>
                       排序
-                      <select
+                      <Select
                         aria-label="排序方式"
                         value={sort}
                         onChange={(event) => setSort(event.target.value as typeof sort)}
@@ -565,7 +567,7 @@ export function LibraryWorkspace(p: Props) {
                         </option>
                         <option value="name">名称</option>
                         <option value="size">大小</option>
-                      </select>
+                      </Select>
                     </label>
                   </div>
                 )}
@@ -922,7 +924,7 @@ export function LibraryWorkspace(p: Props) {
                         </dl>
                         <label className="form-label">
                           所在分类
-                          <select
+                          <Select
                             aria-label="所在分类"
                             value={p.selected.categoryId || ''}
                             disabled={p.busy || Boolean(p.selected.deletedAt)}
@@ -938,7 +940,7 @@ export function LibraryWorkspace(p: Props) {
                                   .join(' / ')}
                               </option>
                             ))}
-                          </select>
+                          </Select>
                         </label>
                         <button
                           className="secondary"

@@ -94,11 +94,116 @@ textarea:focus-visible {
   background: var(--hover);
 }
 select {
+  color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 7px 9px;
   font-size: 13px;
+  min-width: 0;
+  max-width: 100%;
+  cursor: pointer;
+}
+select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Keep native selection semantics while styling the picker inside our bundled Chromium. */
+@supports (appearance: base-select) {
+  select,
+  select::picker(select) {
+    appearance: base-select;
+  }
+  select {
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+  }
+  select > button[type='button'] {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+  }
+  select selectedcontent {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  select:hover:not(:disabled),
+  select:open {
+    border-color: var(--accent-border);
+  }
+  select::picker-icon {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    rotate: 45deg;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-inline-start: auto;
+  }
+  select:open::picker-icon {
+    rotate: 225deg;
+  }
+  select::picker(select) {
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px var(--shadow);
+    padding: 5px;
+    margin-block: 5px;
+    width: anchor-size(width);
+    max-width: calc(100vw - 24px);
+    max-height: min(320px, 45vh);
+    position-try-order: normal;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar) transparent;
+    overscroll-behavior: contain;
+    font: inherit;
+  }
+  select option {
+    min-height: 34px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 4px;
+    color: var(--text);
+    background: transparent;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+    cursor: pointer;
+    gap: 8px;
+  }
+  select option:checked {
+    color: var(--text);
+    background: var(--selected);
+  }
+  select option:hover:not(:disabled),
+  select option:focus-visible {
+    background: var(--hover);
+    outline: 1px solid var(--accent-border);
+    outline-offset: -1px;
+  }
+  select option::checkmark {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  select option:disabled {
+    color: var(--muted);
+    cursor: not-allowed;
+  }
 }
 .muted {
   color: var(--muted);

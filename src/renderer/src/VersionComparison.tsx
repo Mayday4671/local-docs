@@ -1,3 +1,4 @@
+import { Select } from './Select'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import type { VersionContent, VersionRecord } from '../../shared/types'
@@ -110,23 +111,23 @@ export function VersionComparison({
       <div className="comparison-selectors">
         <label>
           对比前
-          <select
+          <Select
             aria-label="对比前版本"
             value={beforeId}
             onChange={(e) => setBeforeId(e.target.value)}
           >
             {options}
-          </select>
+          </Select>
         </label>
         <label>
           对比后
-          <select
+          <Select
             aria-label="对比后版本"
             value={afterId}
             onChange={(e) => setAfterId(e.target.value)}
           >
             {options}
-          </select>
+          </Select>
         </label>
       </div>
       <div className="comparison-summary">

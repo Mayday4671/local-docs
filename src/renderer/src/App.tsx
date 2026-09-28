@@ -1,3 +1,4 @@
+import { Select } from './Select'
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, Download, HardDrive, History, Library, Save, Star, X } from 'lucide-react'
 import { ThemeSwitcher } from './ThemeSwitcher'
@@ -963,7 +964,7 @@ export function App() {
                     {storageInfo.notice}
                   </p>
                 )}
-                <p className="muted">版本 0.10.2 · 测试版</p>
+                <p className="muted">版本 0.10.3 · 测试版</p>
                 <p>原文件不会随导入而移动或删除。文档副本、分类和历史版本保存在上述目录。</p>
                 <StorageActions
                   onBackup={backupLibrary}
@@ -1037,7 +1038,7 @@ export function App() {
                 {modal === 'category' && (
                   <label className="form-label">
                     上级分类
-                    <select
+                    <Select
                       aria-label="上级分类"
                       value={createParent || ''}
                       onChange={(event) => setCreateParent(event.target.value || null)}
@@ -1050,7 +1051,7 @@ export function App() {
                             .join(' / ')}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </label>
                 )}
                 <p className="muted">

@@ -1,3 +1,4 @@
+import { Select } from './Select'
 import { useEffect, useRef, useState } from 'react'
 import {
   getDocument,
@@ -137,7 +138,7 @@ export default function PdfReader({ doc }: { doc: DocumentRecord }) {
         >
           下一页
         </button>
-        <select
+        <Select
           aria-label="PDF 缩放"
           value={zoom}
           onChange={(e) => setZoom(Number(e.target.value))}
@@ -147,7 +148,7 @@ export default function PdfReader({ doc }: { doc: DocumentRecord }) {
               {z * 100}%
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       {loading && (
         <p className="muted" role="status">

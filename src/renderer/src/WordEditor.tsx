@@ -1,3 +1,4 @@
+import { Select } from './Select'
 import { useEffect, useRef, useState } from 'react'
 import { Search, Plus } from 'lucide-react'
 import type { OfficeChange, OfficeEditField, OfficeEditModel } from '../../shared/types'
@@ -248,7 +249,7 @@ export function WordEditor({
         </button>
         <label className="office-zoom">
           缩放
-          <select
+          <Select
             aria-label="文档缩放"
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
@@ -258,7 +259,7 @@ export function WordEditor({
                 {v}%
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       </div>
       <div className="word-edit-scroll">

@@ -1,12 +1,12 @@
 # Windows 交付说明
 
-日期：2026-09-28。当前版本：0.10.2 开发测试版。
+日期：2026-09-28。当前版本：0.10.3 开发测试版。
 
 ## 安装包
 
-`release/0.10.2/local-docs-0.10.2-x64-setup.exe`，116,467,015 字节（约 111 MiB）。
+`release/0.10.3/local-docs-0.10.3-x64-setup.exe`，116,467,734 字节（约 111 MiB）。
 
-在线下载：[EXE 安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.2/local-docs-0.10.2-x64-setup.exe) · [发布说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.2) · [SHA256SUMS.txt](https://github.com/Mayday4671/local-docs/releases/download/v0.10.2/SHA256SUMS.txt)。以测试版发布。
+在线下载：[EXE 安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.3/local-docs-0.10.3-x64-setup.exe) · [发布说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.3) · [SHA256SUMS.txt](https://github.com/Mayday4671/local-docs/releases/download/v0.10.3/SHA256SUMS.txt)。以测试版发布。
 
 保存并关闭旧版窗口后，双击 EXE，按照中文向导安装。应用包含运行环境、界面、数据库引擎和本地文档解析，不需要另装 Node.js、npm、Office、WebView2 或服务器。安装与日常使用无需联网，可用 U 盘携带安装包。安装包尚未数字签名。
 
@@ -17,6 +17,8 @@
 地址配置和浏览器缓存仍在 `%APPDATA%/local-docs/`，其中 `storage-location.json` 只保存文档库路径。本次不改变 schema v5 或备份 v2；含 0.9.0 新增文件类型的备份应使用 0.9.0 或更新版本恢复。跨电脑继续使用完整备份 / 恢复。
 
 ## 本次修正
+
+0.10.3 统一分类、批量移动、导入、类型筛选、排序、标记颜色、历史版本及 Word / PDF 缩放下拉框。展开列表使用应用主题的圆角、间距、滚动条和选中勾号；长名称收起时省略，展开时换行显示。优先向下展开，空间不足时避让窗口边缘，选项多时滚动。修复 Esc 收起下拉框时连带关闭外层分类弹窗或列表菜单的问题。保留原生键盘和表单行为，无新增依赖或数据库变更。
 
 0.10.2 将首页“收起预览”从菜单移到预览区右上角，使用常驻的“×”图标，选中文件和空状态保持一致。收起后，列表右上角显示展开图标，点击恢复预览及此前的分栏宽度；两个菜单中不再显示重复的收起 / 展开文字项。
 
@@ -47,6 +49,15 @@
 Markdown 侧栏和编辑页支持表格、任务列表、删除线及代码缩进；Excel 侧栏改用真实工作表网格，并按数字格式显示日期、百分比、千分位和补零编号。修复 Office 编码换行和 Word 宽表访问问题。
 
 0.3.1 将主题入口从设置弹窗移至主界面和阅读 / 编辑页右上角。点击主题按钮即可选择浅色、深色、跟随系统，立即生效并自动记忆；键盘方向键、Esc 与点击菜单外关闭可用。切换不会重新读取文档，未保存的编辑内容保持不变。
+
+## 0.10.3 验收结果
+
+- 类型检查、格式检查、生产构建与中文 NSIS 打包通过。
+- 直接运行包内 EXE，通过下拉框专项、分类整理、历史对比、文件类型、界面流程、收藏标记与内容编辑六组桌面回归。全部使用隔离数据和合成文件。
+- 下拉框专项逐项打开分类 / 移动 / 导入 / 类型 / 排序 / 文档分类 / 标记颜色 / 历史版本 / Word 与 PDF 缩放控件，验证鼠标选择、空格展开、方向定位、Enter 确认、Esc / Tab / 点击外部关闭、禁用状态，以及外层弹窗不会跟着 Esc 关闭。
+- 已检查深色短列表、长分类名省略、浅色窄窗口及多选项滚动截图；正常空间优先向下展开，长列表限制高度并避让窗口边缘。
+- 下拉框基于随包 Chromium 的原生可定制 select，实现依据：[MDN 可定制选择控件](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select)。包内运行时已实际验证支持该能力，保留表单与键盘行为。
+- 发布包无用户资料库。未重复存储 / 备份单元测试或安装升级验收，未覆盖安装用户当前程序。安装包未签名。
 
 ## 0.10.2 验收结果
 

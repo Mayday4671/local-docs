@@ -1,3 +1,4 @@
+import { Select } from './Select'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { FileText, Folder, X } from 'lucide-react'
 import type {
@@ -44,7 +45,7 @@ function CategorySelect({
   return (
     <label className="form-label">
       {label}
-      <select
+      <Select
         aria-label={label}
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
@@ -55,7 +56,7 @@ function CategorySelect({
             {c.path}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   )
 }
@@ -91,6 +92,8 @@ function Dialog({
         aria-modal="true"
         aria-label={title}
         onKeyDown={(e) => {
+          // The picker handles its own Escape/Tab before the containing dialog.
+          if (e.target instanceof Element && e.target.closest('select:open')) return
           if (e.key === 'Escape' && !busy) {
             e.stopPropagation()
             onClose()
@@ -355,14 +358,14 @@ export function FolderPreviewDialog({
       />
       <label className="form-label">
         重复文件
-        <select
+        <Select
           aria-label="重复文件"
           value={duplicates}
           onChange={(e) => setDuplicates(e.target.value as 'skip' | 'keep')}
         >
           <option value="skip">跳过同分类中同名且内容相同的文件</option>
           <option value="keep">全部保留为新副本</option>
-        </select>
+        </Select>
       </label>
       <p className="muted">同名分类会复用。同名但内容不同的文件会自动加编号，不会覆盖已有文件。</p>
       <details className="folder-details">

@@ -1,3 +1,4 @@
+import { Select } from './Select'
 import { useEffect, useRef, useState } from 'react'
 import { Highlighter, Search } from 'lucide-react'
 import type {
@@ -284,7 +285,7 @@ export function ReadingPane({
           <blockquote>{editing.quote}</blockquote>
           <label>
             标记颜色
-            <select
+            <Select
               aria-label="标记颜色"
               value={editing.color}
               onChange={(e) =>
@@ -295,7 +296,7 @@ export function ReadingPane({
               <option value="green">绿色</option>
               <option value="blue">蓝色</option>
               <option value="pink">粉色</option>
-            </select>
+            </Select>
           </label>
           <textarea
             aria-label="标记备注"
