@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { Download, FileText } from 'lucide-react'
 import { fileKind } from '../../shared/file-types'
 import type { DocumentRecord } from '../../shared/types'
+import { TextReader } from './TextReader'
 
 const PdfReader = lazy(() => import('./PdfReader'))
 export function FileFallback({ doc, message }: { doc: DocumentRecord; message?: string }) {
@@ -75,9 +76,7 @@ export function FileReader({ doc, text }: { doc: DocumentRecord; text: string | 
   const kind = fileKind(doc.extension)
   if (kind === 'text')
     return text !== null ? (
-      <pre className="plain-text-reader" data-mark-scope="text">
-        {text}
-      </pre>
+      <TextReader extension={doc.extension} text={text} />
     ) : (
       <FileFallback
         doc={doc}

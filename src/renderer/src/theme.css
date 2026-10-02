@@ -24,6 +24,12 @@
   --highlight-border: #baa054;
   --overlay: #18233f55;
   --shadow: #21375b24;
+  --code-keyword: #8543a6;
+  --code-string: #237340;
+  --code-number: #9b4d17;
+  --code-comment: #64748b;
+  --code-property: #175f9c;
+  --code-title: #935023;
 }
 /* Electron's nativeTheme also updates this media query for explicit app preferences. */
 @media (prefers-color-scheme: dark) {
@@ -53,6 +59,12 @@
     --highlight-border: #c5a253;
     --overlay: #080e19aa;
     --shadow: #00000055;
+    --code-keyword: #d3a4fa;
+    --code-string: #a2d6a2;
+    --code-number: #f2ba8f;
+    --code-comment: #9baabc;
+    --code-property: #8ec9fa;
+    --code-title: #eacb91;
   }
 }
 input::placeholder,

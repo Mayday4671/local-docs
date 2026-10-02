@@ -6,17 +6,19 @@
 
 ## Windows 安装使用
 
-**[下载 0.10.7 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.7/local-docs-0.10.7-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.7)
+**[下载 0.10.8 Windows 离线安装包](https://github.com/Mayday4671/local-docs/releases/download/v0.10.8/local-docs-0.10.8-x64-setup.exe)** · [更新与安装说明](https://github.com/Mayday4671/local-docs/releases/tag/v0.10.8)
 
 适用于 Windows 10 / 11 x64。下载 EXE 后双击进入中文安装向导，安装后从开始菜单打开“我的文档库”。安装和日常使用无需联网，也无需另外安装 Node.js、npm、数据库服务、Office 或 WebView2；离线电脑可通过 U 盘携带安装包。普通使用不需要下载 GitHub 自动生成的 Source code。
 
-本地构建产物位于 `release/0.10.7/local-docs-0.10.7-x64-setup.exe`。安装文件夹名为英文 `local-docs`；通过“浏览”选择 `D:\Soft` 后，路径框自动显示 `D:\Soft\local-docs`。发布包不包含用户资料库或个人文档，新电脑首次运行在安装目录的 `data/library` 下创建空文档库；换机请通过应用的“完整备份 → 恢复”迁移资料。
+本地构建产物位于 `release/0.10.8/local-docs-0.10.8-x64-setup.exe`。安装文件夹名为英文 `local-docs`；通过“浏览”选择 `D:\Soft` 后，路径框自动显示 `D:\Soft\local-docs`。发布包不包含用户资料库或个人文档，新电脑首次运行在安装目录的 `data/library` 下创建空文档库；换机请通过应用的“完整备份 → 恢复”迁移资料。
+
+**0.10.8 新增文本语言识别与语法高亮。** SQL、JSON / JSONL、XML / HTML、YAML、配置文件及常见代码文件按扩展名选择语法，TXT 中结构明确的 JSON、SQL 和带解释器声明的脚本可按内容识别。浅色 / 深色主题同步着色，中文、缩进和换行保持原样；查找、复制与标记沿用原流程。语法资源随 EXE 打包，处理在本地后台完成，无需联网。文本继续只读；过大的文本或处理失败时完整显示普通原文，详见 [0.10.8 验收](docs/0.10.8文本语言识别与高亮验收.md)。
 
 这是 **0.10.7 测试版 EXE**。PDF 取消独立的 30 MB 预览限制，按需分块读取，支持应用现有单文件 100 MB 上限；连续滚动阅读，Ctrl＋滚轮同步改变页面宽高，超出窗口后可横向滚动。首页预览默认隐藏，只通过列表右上角的“展开预览”按钮显示。单击、右击、导入、新建后返回列表都保留当前开关状态，右键菜单不再自动展开预览。已展开时切换文件正常更新，隐藏时不读取预览正文；分栏宽度继续记忆。文档库默认放在安装目录下，“设置 → 文档库位置 → 修改位置”可迁移到其他磁盘，复制校验后立即切换并保留旧副本。旧版资料自动迁入默认位置，失败时继续使用旧库。PDF、TXT、SQL、图片收纳与阅读、文件拖入等已有功能保留。完整 Office 编辑和 V1.1 全部要求尚未完成。安装包未做数字签名，附有 SHA-256 校验文件。验证范围见 [Windows 交付说明](docs/Windows交付说明.md)。
 
 ## 当前阶段
 
-**0.10.7 开发测试版，尚未完成 V1.1 验收。**
+**0.10.8 开发测试版，尚未完成 V1.1 验收。**
 
 已有可运行流程：
 
@@ -32,6 +34,7 @@
 - 批量添加或拖入 PDF、TXT、SQL、CSV、JSON、图片、DOCX、XLSX、Markdown 等文件；其他普通文件也可收纳和原样导出。保存独立副本，不修改导入源文件。
 - PDF 离线连续滚动、按钮翻页、Ctrl＋滚轮缩放和复制本页文字，阅读组件、字体及 CMaps 随 EXE 打包；常见图片内置预览。
 - TXT、SQL、代码与配置文件以纯文本阅读，保留缩进和换行，支持正文搜索、文内查找与内容标记；不会执行 SQL、HTML 或脚本。
+- 文本按语言显示语法颜色与类型标识，扩展名优先；TXT 只在结构明确时推断语言，普通说明、CSV 和日志保持普通显示。大文本仍可阅读和检索，着色有独立资源限制。
 - 首页拖入文件时显示目标分类；无分类文件在“全部文件”中查看，侧栏不再提供“未分类”入口。
 - 新建分类、移动文档、重命名、收藏；查看本批导入的文件。
 - 按文件名、常见文本和 Markdown 正文、Word 段落和 Excel 单元格内容搜索，支持一两个汉字；按类型筛选。
@@ -94,13 +97,14 @@ npm run test:editor-split # 两栏拖动、重置、窄窗口、草稿保护与�
 npm run test:library-split # 首页调宽、预览收起展开、三种文件预览与独立记忆
 npm run test:history    # 历史差异、草稿保护、分页、直接编辑与只读错误验证
 npm run test:files      # 多类型文件、原生文件拖入、离线中文 PDF 与原件保护
+npm run test:syntax     # 离线语言高亮、中文编码、主题、跨颜色查找和标记、原字节导出
 npm run test:context-menu # 文件右键、批量操作、恢复及彻底删除确认与原件保护
 npm run test:pdf        # 大 PDF 分块读取、连续滚动、混合尺寸与缩放宽度验证
 npm run test:zoom       # PDF / Word 滚轮缩放、比例菜单、草稿及原件保护
 npm run test:dropdown   # 下拉框展开、键盘、弹窗层级、长选项、主题与窄窗口
 npm run test:storage    # 安装目录默认存储、路径迁移、重启与旧版资料迁移
 npm run test:installer-storage # 隔离验证 NSIS 清理钩子保留资料，需先打包以缓存 NSIS 工具
-npm run test:packaged   # 验证当前版本 release/0.10.7/win-unpacked 中的独立 EXE，需先打包
+npm run test:packaged   # 验证当前版本 release/0.10.8/win-unpacked 中的独立 EXE，需先打包
 npm run start           # 打开已构建的桌面应用
 npm run package:win     # 生成 Windows NSIS 安装包，输出到 release/
 ```

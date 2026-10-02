@@ -21,6 +21,65 @@
 .plain-text-reader {
   user-select: text;
 }
+.text-reader {
+  min-height: 100%;
+  background: var(--surface);
+}
+.text-reader-meta {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 11px;
+}
+.text-language {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--tint);
+  color: var(--accent);
+  font-weight: 600;
+}
+.text-reader .plain-text-reader {
+  min-height: 0;
+}
+.plain-text-reader .hljs-keyword,
+.plain-text-reader .hljs-selector-tag,
+.plain-text-reader .hljs-built_in {
+  color: var(--code-keyword);
+}
+.plain-text-reader .hljs-string,
+.plain-text-reader .hljs-regexp,
+.plain-text-reader .hljs-template-tag {
+  color: var(--code-string);
+}
+.plain-text-reader .hljs-number,
+.plain-text-reader .hljs-literal,
+.plain-text-reader .hljs-symbol {
+  color: var(--code-number);
+}
+.plain-text-reader .hljs-comment,
+.plain-text-reader .hljs-quote {
+  color: var(--code-comment);
+}
+.plain-text-reader .hljs-attr,
+.plain-text-reader .hljs-attribute,
+.plain-text-reader .hljs-property,
+.plain-text-reader .hljs-variable {
+  color: var(--code-property);
+}
+.plain-text-reader .hljs-title,
+.plain-text-reader .hljs-type,
+.plain-text-reader .hljs-name,
+.plain-text-reader .hljs-meta {
+  color: var(--code-title);
+}
 .file-fallback {
   min-height: 260px;
   padding: 36px 20px;

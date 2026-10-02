@@ -8,6 +8,7 @@ await access(executablePath)
 for (const script of [
   'scripts/storage-smoke.mjs',
   'scripts/file-import-smoke.mjs',
+  'scripts/text-syntax-smoke.mjs',
   'scripts/pdf-smoke.mjs',
   'scripts/smoke.mjs',
   'scripts/office-smoke.mjs',
