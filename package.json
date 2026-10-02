@@ -1,6 +1,6 @@
 {
   "name": "local-docs",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "private": true,
   "description": "我的文档库：个人离线文档管理桌面应用",
   "author": "Mayday4671",
@@ -35,7 +35,8 @@
     "test:files": "npm run build && node scripts/file-import-smoke.mjs",
     "test:dropdown": "npm run build && node scripts/dropdown-smoke.mjs",
     "test:zoom": "npm run build && node scripts/zoom-smoke.mjs",
-    "test:context-menu": "npm run build && node scripts/context-menu-smoke.mjs"
+    "test:context-menu": "npm run build && node scripts/context-menu-smoke.mjs",
+    "test:pdf": "npm run build && node scripts/pdf-smoke.mjs"
   },
   "dependencies": {
     "docx-preview": "0.4.1",

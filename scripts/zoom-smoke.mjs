@@ -59,7 +59,7 @@ async function singleLineOptions(name, screenshot) {
   await expect(page.locator('select:open')).toHaveCount(0)
 }
 const waitForPdf = async () => {
-  await expect(page.locator('.pdf-reader:visible canvas')).toBeVisible()
+  await expect(page.locator('.pdf-reader:visible canvas').first()).toBeVisible()
   await expect(page.locator('.pdf-reader:visible [role="status"]')).toHaveCount(0)
 }
 try {
@@ -85,13 +85,16 @@ try {
   await page.getByRole('row', { name: /滚轮测试.pdf/ }).click()
   await waitForPdf()
   const zoom = page.getByRole('combobox', { name: 'PDF 缩放', exact: true })
-  const content = page.locator('.reading-content:visible')
-  const width = (await page.locator('.pdf-reader:visible canvas').boundingBox()).width
+  const content = page.locator('.pdf-reader:visible .pdf-scroll')
+  const width = (await page.locator('.pdf-reader:visible canvas').first().boundingBox()).width
   await wheel(content, -100)
   await expect(zoom).toHaveValue('110')
   await waitForPdf()
   await expect
-    .poll(async () => (await page.locator('.pdf-reader:visible canvas').boundingBox())?.width || 0)
+    .poll(
+      async () =>
+        (await page.locator('.pdf-reader:visible canvas').first().boundingBox())?.width || 0,
+    )
     .toBeGreaterThan(width)
   // At a scrollbar boundary, rendering must settle instead of repeatedly replacing the canvas.
   const stable = await page.locator('.pdf-reader:visible').evaluate(async (el) => {
@@ -117,8 +120,9 @@ try {
     ),
   ).toBe(browserZoom)
   await page.getByRole('button', { name: '打开', exact: true }).click()
+  await expect(page.locator('.editor-page')).toBeVisible()
   await waitForPdf()
-  await page.getByRole('button', { name: '下一页', exact: true }).click()
+  await page.locator('.editor-page').getByRole('button', { name: '下一页', exact: true }).click()
   await expect(page.locator('.pdf-tools:visible')).toContainText('2 / 2 页')
   await waitForPdf()
   await wheel(content, -100)

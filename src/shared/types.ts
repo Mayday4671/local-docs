@@ -131,6 +131,8 @@ export interface LibraryApi {
   importFiles(categoryId: string | null): Promise<ImportResult>
   importDroppedFiles(paths: string[], categoryId: string | null): Promise<ImportResult>
   readFilePreview(id: string): Promise<Uint8Array>
+  pdfInfo(id: string): Promise<{ size: number; hash: string }>
+  readPdfRange(id: string, hash: string, begin: number, end: number): Promise<Uint8Array>
   createMarkdown(name: string, categoryId: string | null): Promise<DocumentRecord>
   createCategory(name: string, parentId?: string | null): Promise<Category>
   copyDocumentPath(id: string): Promise<void>
@@ -196,6 +198,8 @@ export const IPC = {
   importFiles: 'library:import',
   importDroppedFiles: 'library:import-dropped',
   readFilePreview: 'library:file-preview',
+  pdfInfo: 'library:pdf-info',
+  readPdfRange: 'library:pdf-range',
   createMarkdown: 'library:create-markdown',
   createCategory: 'library:create-category',
   copyDocumentPath: 'library:copy-path',

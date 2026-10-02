@@ -21,6 +21,44 @@ afterEach(() => {
 })
 
 describe('文档库持久化与文件保护', () => {
+  test('PDF 分块读取覆盖 100 MB，校验身份、范围与截断，且不改动文档和源文件', () => {
+    const bytes = Buffer.alloc(100 * 1024 ** 2, 65)
+    bytes.write('%PDF-1.4\n')
+    bytes.write('%%EOF', bytes.length - 5)
+    const source = join(directory, '大文件.pdf')
+    writeFileSync(source, bytes)
+    const doc = library.importFile(source, null)
+    const info = library.pdfInfo(doc.id)
+    const before = library.snapshot(),
+      versions = library.versions(doc.id)
+    expect(info.size).toBe(bytes.length)
+    expect(Buffer.from(library.readPdfRange(doc.id, info.hash, 0, 1024 ** 2))).toEqual(
+      bytes.subarray(0, 1024 ** 2),
+    )
+    expect(
+      Buffer.from(
+        library.readPdfRange(doc.id, info.hash, bytes.length - 5, bytes.length),
+      ).toString(),
+    ).toBe('%%EOF')
+    for (const [begin, end] of [
+      [-1, 3],
+      [0, 0],
+      [1, 0],
+      [0.5, 1],
+      [0, Infinity],
+      [0, 1024 ** 2 + 1],
+      [bytes.length, bytes.length + 1],
+    ])
+      expect(() => library.readPdfRange(doc.id, info.hash, begin, end)).toThrow('读取范围')
+    expect(() => library.readPdfRange(doc.id, 'different', 0, 1)).toThrow('文档已更改')
+    expect(() => library.pdfInfo('../outside.pdf')).toThrow('编号')
+    expect(() => library.pdfInfo(library.createMarkdown('其他类型', null).id)).toThrow('不是 PDF')
+    expect(library.readDocument(doc.id).document).toEqual(before.documents[0])
+    expect(library.versions(doc.id)).toEqual(versions)
+    expect(readFileSync(source).equals(bytes)).toBe(true)
+    writeFileSync(library.documentPath(doc.id), 'truncated')
+    expect(() => library.readPdfRange(doc.id, info.hash, 0, 1)).toThrow('不完整')
+  })
   test('历史读取不改变当前文件、最近使用、草稿或版本列表，拒绝跨文件版本', () => {
     const doc = library.createMarkdown('版本对比', null)
     const original = library.versions(doc.id)[0]

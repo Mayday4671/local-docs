@@ -44,6 +44,9 @@ const api: Omit<LibraryApi, 'importDroppedFiles'> = {
   searchResults: (query) => ipcRenderer.invoke(IPC.searchResults, query),
   readOffice: (id, includeLayout) => ipcRenderer.invoke(IPC.readOffice, id, includeLayout),
   readFilePreview: (id) => ipcRenderer.invoke(IPC.readFilePreview, id),
+  pdfInfo: (id) => ipcRenderer.invoke(IPC.pdfInfo, id),
+  readPdfRange: (id, hash, begin, end) =>
+    ipcRenderer.invoke(IPC.readPdfRange, id, hash, begin, end),
   importFiles: (categoryId) => ipcRenderer.invoke(IPC.importFiles, categoryId),
   createMarkdown: (name, categoryId) => ipcRenderer.invoke(IPC.createMarkdown, name, categoryId),
   createCategory: (name, parentId) => ipcRenderer.invoke(IPC.createCategory, name, parentId),

@@ -988,7 +988,7 @@ export function App() {
                     {storageInfo.notice}
                   </p>
                 )}
-                <p className="muted">版本 0.10.6 · 测试版</p>
+                <p className="muted">版本 0.10.7 · 测试版</p>
                 <p>原文件不会随导入而移动或删除。文档副本、分类和历史版本保存在上述目录。</p>
                 <StorageActions
                   onBackup={backupLibrary}

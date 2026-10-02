@@ -90,15 +90,15 @@ try {
   await page.getByRole('row', { name: /阅读.pdf/ }).dblclick()
   const pdf = page.locator('.editor-page .pdf-reader')
   await expect(pdf.getByText('1 / 2 页', { exact: true })).toBeVisible()
-  await expect(pdf.locator('canvas')).toBeVisible()
+  await expect(pdf.locator('canvas[aria-label="PDF 第 1 页"]')).toBeVisible()
   await expect(pdf.locator('pre')).toContainText('Offline PDF - page one')
   await pdf.getByRole('button', { name: '下一页' }).click()
   await expect(pdf.locator('pre')).toContainText('离线预览测试')
   await pdf.getByLabel('PDF 缩放').selectOption('150')
-  await expect(pdf.locator('canvas')).toBeVisible()
+  await expect(pdf.locator('canvas[aria-label="PDF 第 2 页"]')).toBeVisible()
   await expect(pdf.getByRole('status')).toHaveCount(0)
   expect(
-    await pdf.locator('canvas').evaluate((c) => {
+    await pdf.locator('canvas[aria-label="PDF 第 2 页"]').evaluate((c) => {
       const data = c.getContext('2d').getImageData(0, 0, c.width, c.height).data
       return data.some((v, i) => i % 4 !== 3 && v < 100)
     }),

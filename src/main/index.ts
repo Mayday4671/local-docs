@@ -322,6 +322,8 @@ function registerApi(
     },
     importDroppedFiles: importPaths,
     readFilePreview: async (id) => store.readFilePreview(id),
+    pdfInfo: async (id) => store.pdfInfo(id),
+    readPdfRange: async (id, hash, begin, end) => store.readPdfRange(id, hash, begin, end),
     createMarkdown: async (name, categoryId) => store.createMarkdown(name, categoryId),
     createCategory: async (name, parentId) => store.createCategory(name, parentId ?? null),
     copyDocumentPath: async (id) => clipboard.writeText(store.documentPath(id)),

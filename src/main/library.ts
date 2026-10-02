@@ -5,10 +5,12 @@ import {
   copyFileSync,
   existsSync,
   fsyncSync,
+  fstatSync,
   lstatSync,
   mkdirSync,
   openSync,
   readFileSync,
+  readSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs'
@@ -823,12 +825,47 @@ export class Library {
 
   readFilePreview(id: string): Uint8Array {
     const row = this.row(id)
-    if (!['pdf', 'image'].includes(fileKind(String(row.extension))))
-      throw new Error('此文件不使用图像预览。')
+    if (fileKind(String(row.extension)) !== 'image') throw new Error('此文件不使用图像预览。')
     if (Number(row.size) > 30 * 1024 ** 2)
-      throw new Error('文件已保存。超过 30 MB 的 PDF / 图片请导出后使用本地软件阅读。')
+      throw new Error('文件已保存。超过 30 MB 的图片请导出后使用本地软件阅读。')
     const bytes = readFileSync(this.objectPath(String(row.blob_hash)))
     return new Uint8Array(bytes)
+  }
+
+  pdfInfo(id: string): { size: number; hash: string } {
+    const row = this.row(id)
+    if (row.extension !== '.pdf') throw new Error('此文件不是 PDF。')
+    return { size: Number(row.size), hash: String(row.blob_hash) }
+  }
+
+  /** Read bounded local ranges; neither paths nor whole PDF copies cross the IPC bridge. */
+  readPdfRange(id: string, hash: string, begin: number, end: number): Uint8Array {
+    const source = this.pdfInfo(id)
+    if (hash !== source.hash) throw new Error('文档已更改，请重新打开 PDF。')
+    if (
+      !Number.isSafeInteger(begin) ||
+      !Number.isSafeInteger(end) ||
+      begin < 0 ||
+      end <= begin ||
+      end > source.size ||
+      end - begin > 1024 ** 2
+    )
+      throw new Error('无效的 PDF 读取范围。')
+    const handle = openSync(this.objectPath(source.hash), 'r')
+    try {
+      const info = fstatSync(handle)
+      if (!info.isFile() || info.size !== source.size) throw new Error('PDF 文件不完整。')
+      const bytes = new Uint8Array(end - begin)
+      let read = 0
+      while (read < bytes.length) {
+        const count = readSync(handle, bytes, read, bytes.length - read, begin + read)
+        if (!count) throw new Error('PDF 文件不完整。')
+        read += count
+      }
+      return bytes
+    } finally {
+      closeSync(handle)
+    }
   }
 
   openDocument(id: string): DocumentContent {

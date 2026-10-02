@@ -117,7 +117,7 @@ try {
   await row('阅读.pdf').click({ button: 'right' })
   await expect(menu.getByRole('menuitem', { name: '编辑', exact: true })).toHaveCount(0)
   await action('打开')
-  await expect(page.locator('.editor-page .pdf-reader canvas')).toBeVisible()
+  await expect(page.locator('.editor-page .pdf-reader canvas').first()).toBeVisible()
   await page.getByRole('button', { name: '返回列表', exact: true }).click()
 
   // Native keyboard invocation, roving focus, Escape return, outside click and edge placement.
